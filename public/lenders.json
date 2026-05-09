@@ -1,14 +1,19 @@
 {
-  "lastUpdated": "2026-05-07",
+  "lastUpdated": "2026-05-09",
   "lenders": [
     {
       "id": "ledn",
       "name": "Ledn",
       "country": ["us", "ca", "global"],
       "excluded": [],
-      "minLoanUsd": 500,
+      "minLoanUsd": 1000,
       "maxLtv": 50,
-      "rateRange": [9.99, 11.49],
+      "rateTiers": [
+        { "maxLoanUsd": 250000, "aprPct": 11.49 },
+        { "maxLoanUsd": 1000000, "aprPct": 10.99 },
+        { "maxLoanUsd": 2000000, "aprPct": 10.49 },
+        { "maxLoanUsd": null, "aprPct": 9.99 }
+      ],
       "originationFeePct": 2,
       "feeWaivedFor": ["us", "ca"],
       "custody": "Third-party custody (BitGo, others). Standard (rehypothecated) or Custodied (segregated).",
@@ -16,27 +21,35 @@
       "rehypothecation": "optional",
       "term": "12 months, prepayable anytime",
       "rollover": "Yes, subject to approval",
-      "notes": "Longest-running BTC lender. $10B+ funded with no client losses. No monthly payments.",
+      "repayment": "Balloon at maturity. No monthly payments. Repay anytime in USD, USDC, or local currency. Interest accrues daily but only owed when loan closes. No early-repayment penalty.",
+      "notes": "Longest-running BTC lender. $10B+ funded with no client losses. Tiered rates kick in automatically at $250K, $1M, and $2M.",
       "badge": "Established",
       "referralUrl": "https://ledn.io"
     },
     {
       "id": "strike",
       "name": "Strike",
-      "country": ["us", "eu", "global"],
+      "country": ["us", "eu", "ca", "uk", "au", "ch", "global"],
       "excluded": [],
       "minLoanUsd": 10000,
       "maxLtv": 50,
-      "rateRange": [9.5, 9.5],
+      "rateTiers": [
+        { "maxLoanUsd": 250000, "aprPct": 10.5 },
+        { "maxLoanUsd": 1000000, "aprPct": 9.5 },
+        { "maxLoanUsd": 5000000, "aprPct": 8.5 },
+        { "maxLoanUsd": null, "aprPct": 7.49 }
+      ],
+      "regionalRateAdjustment": { "us": 0, "default": 1.0 },
       "originationFeePct": 0,
       "feeWaivedFor": [],
-      "custody": "Custodial. BTC-only collateral.",
+      "custody": "Custodial. BTC-only collateral. Held by Strike or transferred to vetted third-party capital providers (no further rehypothecation).",
       "custodyType": "custodial",
       "rehypothecation": "no",
-      "term": "12 months, interest-only, balloon at maturity",
-      "rollover": "Yes",
-      "notes": "Lowest fixed rate among major US lenders. Zero fees.",
-      "badge": "Lowest fee",
+      "term": "12 months. Available globally as of July 2025.",
+      "rollover": "Yes — multiple loans (up to 3) and refinance supported",
+      "repayment": "Two options: (1) Payment at Maturity — principal + interest in single balloon payment, or (2) Monthly Payments — interest paid monthly, principal at maturity. No origination fee, no early repayment fee, no liquidation fee. Daily interest accrual. Loans payable in USD or USDC. EUR/GBP supported in many countries.",
+      "notes": "Aggressive tier discounts at $250K, $1M, and $5M. US rates start 1% lower than global. Lending Proof-of-Reserves launched 2026. Volatility-proof loan structure (no forced liquidation on price drops) being rolled out.",
+      "badge": "Best rates at scale",
       "referralUrl": "https://strike.me"
     },
     {
@@ -46,15 +59,20 @@
       "excluded": ["AL","CA","DE","HI","MN","MS","MT","NV","ND","RI","SC","SD","TX","VT","VA","WA"],
       "minLoanUsd": 1000,
       "maxLtv": 60,
-      "rateRange": [8.49, 11.84],
+      "rateTiers": [
+        { "maxLoanUsd": 100000, "aprPct": 11.0 },
+        { "maxLoanUsd": 500000, "aprPct": 10.0 },
+        { "maxLoanUsd": null, "aprPct": 8.49 }
+      ],
       "originationFeePct": 1.49,
       "feeWaivedFor": [],
-      "custody": "Anchorage Digital (federally chartered). Multi-collateral.",
+      "custody": "Anchorage Digital (federally chartered). Multi-collateral support: BTC, ETH, SOL.",
       "custodyType": "custodial",
       "rehypothecation": "no",
       "term": "Up to 24 months",
-      "rollover": "Yes",
-      "notes": "Tiered rates — larger loans get lower APR. 2% partial liquidation fee.",
+      "rollover": "Yes, refinance available",
+      "repayment": "Two options: (1) Interest-only monthly with balloon at maturity, or (2) Principal + interest monthly (amortizing). Payments in USD or USDC. No early repayment penalty. 2% partial liquidation fee if collateral has to be sold.",
+      "notes": "Tiered rates strongly favor larger loans. Custody at Anchorage (federally chartered) — strong trust signal. Two repayment models give flexibility most lenders don't.",
       "badge": "Best for big loans",
       "referralUrl": "https://archlending.com"
     },
@@ -65,7 +83,9 @@
       "excluded": [],
       "minLoanUsd": 10000,
       "maxLtv": 75,
-      "rateRange": [10, 10],
+      "rateTiers": [
+        { "maxLoanUsd": null, "aprPct": 10.0 }
+      ],
       "originationFeePct": 0,
       "feeWaivedFor": [],
       "custody": "Custodial. Highest LTV in market.",
@@ -73,7 +93,8 @@
       "rehypothecation": "yes",
       "term": "Variable",
       "rollover": "Yes",
-      "notes": "75% LTV is the most aggressive available — capital-efficient but high liquidation risk.",
+      "repayment": "Interest-only payments during loan, principal due at maturity. Repayment in USD via bank account. No prepayment penalty. Liquidation buffer between 75% and 80% LTV.",
+      "notes": "75% LTV is the most aggressive available — capital-efficient but high liquidation risk. Rehypothecates collateral, which subsidizes the rate but increases counterparty risk.",
       "badge": "Highest LTV",
       "referralUrl": "https://figure.com"
     },
@@ -84,15 +105,18 @@
       "excluded": [],
       "minLoanUsd": 75000,
       "maxLtv": 50,
-      "rateRange": [10.75, 10.75],
+      "rateTiers": [
+        { "maxLoanUsd": null, "aprPct": 10.75 }
+      ],
       "originationFeePct": 0,
       "feeWaivedFor": [],
       "custody": "Coinbase / BitGo. No rehypothecation.",
       "custodyType": "custodial",
       "rehypothecation": "no",
-      "term": "Interest-only with balloon. Deferred-payment option.",
+      "term": "Interest-only with balloon. Deferred-payment option available.",
       "rollover": "Yes, subject to approval",
-      "notes": "Larger ticket loans ($75K–$5M). Strong custody.",
+      "repayment": "Standard: monthly interest payments, principal balloon at maturity. Deferred option: no monthly payments — interest accrues and is paid in full at maturity along with principal. Higher-touch service for larger loans.",
+      "notes": "Larger ticket loans ($75K–$5M). Strong custody at Coinbase Custody. Deferred-payment option is rare and useful if you need to avoid monthly outflow.",
       "badge": "Big-ticket",
       "referralUrl": "https://milo.io"
     },
@@ -103,15 +127,18 @@
       "excluded": ["ID","MA","NM","ND","SD","VT"],
       "minLoanUsd": 150000,
       "maxLtv": 50,
-      "rateRange": [12, 14],
+      "rateTiers": [
+        { "maxLoanUsd": null, "aprPct": 14.0 }
+      ],
       "originationFeePct": 0,
       "feeWaivedFor": [],
-      "custody": "Collaborative multisig — keys split between you, Unchained, and a third party.",
+      "custody": "Collaborative multisig — keys split between you, Unchained, and a third party. No rehypothecation.",
       "custodyType": "multisig",
       "rehypothecation": "no",
       "term": "6 or 12 months, fixed",
-      "rollover": "Yes",
-      "notes": "BUSINESS LOANS ONLY since 2024. $150K minimum.",
+      "rollover": "Yes, refinance at maturity",
+      "repayment": "Quarterly interest payments via wire transfer in USD. Principal repaid as balloon at end of term. Refinance available. No early repayment fee, but loan is fixed-term so prepayment doesn't reduce interest already accrued.",
+      "notes": "BUSINESS LOANS ONLY since 2024 (consumer loans paused). $150K minimum. Best-in-class custody — your keys, your bitcoin, even during the loan.",
       "badge": "Multisig custody",
       "referralUrl": "https://unchained.com"
     },
@@ -122,17 +149,42 @@
       "excluded": [],
       "minLoanUsd": 1000,
       "maxLtv": 50,
-      "rateRange": [8, 12],
+      "rateTiers": [
+        { "maxLoanUsd": null, "aprPct": 10.0 }
+      ],
       "originationFeePct": 1.5,
       "feeWaivedFor": [],
-      "custody": "Non-custodial multisig escrow. P2P marketplace. MiCA-regulated.",
+      "custody": "Non-custodial multisig escrow. P2P marketplace — investors fund loans directly. MiCA-regulated.",
       "custodyType": "multisig",
       "rehypothecation": "no",
       "term": "Negotiable per loan (typically 3–12 months)",
       "rollover": "New loan required at maturity",
-      "notes": "Best European option. Direct fiat support for EUR/CHF/CZK/PLN.",
+      "repayment": "Interest paid monthly or at maturity (varies by individual loan terms negotiated with the lender on the marketplace). Principal returned as bitcoin to your wallet automatically when loan is repaid in fiat. Repayment accepted in EUR, CHF, CZK, PLN, or USDC.",
+      "notes": "Best European option. P2P marketplace means rates vary by individual deal — typical range 8–12%. Self-custody-aligned with multisig escrow. MiCA-registered.",
       "badge": "EU non-custodial",
-      "referralUrl": "https://firefish.io"
+      "referralUrl": "https://firefish.io?ref=satoshi2899"
+    },
+    {
+      "id": "debifi",
+      "name": "Debifi",
+      "country": ["eu", "ch", "global"],
+      "excluded": [],
+      "minLoanUsd": 10000,
+      "maxLtv": 70,
+      "rateTiers": [
+        { "maxLoanUsd": null, "aprPct": 11.0 }
+      ],
+      "originationFeePct": 1,
+      "feeWaivedFor": [],
+      "custody": "Multisig collaborative custody (2-of-3) between borrower, lender, and Debifi as agent. MiCA-registered.",
+      "custodyType": "multisig",
+      "rehypothecation": "no",
+      "term": "3, 6, 9, or 12 months",
+      "rollover": "Yes, on agreement",
+      "repayment": "Interest paid at maturity (most common) or monthly depending on individual loan terms. Principal repaid in fiat (EUR, USD) or stablecoin. Bitcoin collateral released automatically via multisig once repayment confirmed. Early repayment generally accepted without penalty.",
+      "notes": "Institutional-grade multisig. P2P marketplace connecting borrowers with vetted lenders — rates vary 9–13% depending on loan. Strong custody model — no single party can move funds unilaterally.",
+      "badge": "Institutional multisig",
+      "referralUrl": "https://debifi.com"
     }
   ]
 }

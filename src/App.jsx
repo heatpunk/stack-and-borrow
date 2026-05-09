@@ -784,6 +784,10 @@ function Calculator() {
   const [activeCase, setActiveCase] = usePersistentState("activeCase", "base");
   const [profiles, setProfiles] = usePersistentState("profiles", DEFAULT_PROFILES);
   const [taxRate, setTaxRate] = usePersistentState("taxRate", null);
+  // Easter egg: Hal Finney mode. Activated when any profile has all 3 cases set to 21%.
+  // halTargetYears: how many years from now until BTC reaches $10M (Hal's prediction).
+  const [halMode, setHalMode] = usePersistentState("halMode", false);
+  const [halTargetYears, setHalTargetYears] = usePersistentState("halTargetYears", 12);
   const [editingProfile, setEditingProfile] = useState(null);
   const [showLenders, setShowLenders] = useState(false);
 
@@ -820,7 +824,12 @@ function Calculator() {
   const termYears = termMonths / 12;
 
   // Active profile + active case = the CAGR being used
-  const activeCagr = profiles[activeProfile].cases[activeCase];
+  // Hal Finney's $10M CAGR: solve (10_000_000 / spot)^(1/years) - 1
+  const halCagr = halMode
+    ? (Math.pow(10_000_000 / BTC_SPOT_USD, 1 / halTargetYears) - 1) * 100
+    : null;
+
+  const activeCagr = halMode ? halCagr : profiles[activeProfile].cases[activeCase];
   const futureBtcPrice = projectBtcPrice(BTC_SPOT_USD, activeCagr, termYears);
 
   // ===== TAX-AWARE SELL PATH =====
@@ -878,20 +887,27 @@ function Calculator() {
     for (let m = 0; m <= termMonths; m++) {
       const yrs = m / 12;
       const point = { month: m };
-      Object.entries(profiles).forEach(([key, p]) => {
-        // For non-active profiles, use base case. For active profile, use the selected case.
-        const cagrToUse = key === activeProfile ? p.cases[activeCase] : p.cases.base;
-        const price = projectBtcPrice(BTC_SPOT_USD, cagrToUse, yrs);
+      if (halMode) {
+        // In Hal mode, only one projection line: Hal's CAGR
+        const price = projectBtcPrice(BTC_SPOT_USD, halCagr, yrs);
         const owedAtM = m === 0 ? loanUsd : loanUsd + computeInterest(loanUsd, aprPct, m);
-        point[key] = collateralBtcNeeded * price - owedAtM;
-      });
-      // Sell path uses active profile/case
+        point.hal = collateralBtcNeeded * price - owedAtM;
+      } else {
+        Object.entries(profiles).forEach(([key, p]) => {
+          // For non-active profiles, use base case. For active profile, use the selected case.
+          const cagrToUse = key === activeProfile ? p.cases[activeCase] : p.cases.base;
+          const price = projectBtcPrice(BTC_SPOT_USD, cagrToUse, yrs);
+          const owedAtM = m === 0 ? loanUsd : loanUsd + computeInterest(loanUsd, aprPct, m);
+          point[key] = collateralBtcNeeded * price - owedAtM;
+        });
+      }
+      // Sell path uses active CAGR
       const sellPrice = projectBtcPrice(BTC_SPOT_USD, activeCagr, yrs);
       point.sell = collateralBtcRemainingAfterSell * sellPrice;
       points.push(point);
     }
     return points;
-  }, [profiles, termMonths, collateralBtcNeeded, loanUsd, aprPct, activeProfile, activeCase, activeCagr, BTC_SPOT_USD, collateralBtcRemainingAfterSell]);
+  }, [profiles, termMonths, collateralBtcNeeded, loanUsd, aprPct, activeProfile, activeCase, activeCagr, BTC_SPOT_USD, collateralBtcRemainingAfterSell, halMode, halCagr]);
 
   // ===== LENDERS =====
   const userRegion = CURRENCY_META[currency].region;
@@ -905,14 +921,31 @@ function Calculator() {
   });
 
   const rankedLenders = useMemo(() => {
+    // Resolve the actual APR for the user's loan size from the lender's tier table.
+    // Tiers are sorted by maxLoanUsd ascending; the first tier whose threshold the loan
+    // doesn't exceed wins. The last tier has maxLoanUsd: null meaning "no upper bound".
+    const resolveApr = (l, loanSize) => {
+      if (!l.rateTiers || l.rateTiers.length === 0) return null;
+      for (const tier of l.rateTiers) {
+        if (tier.maxLoanUsd === null || loanSize < tier.maxLoanUsd) {
+          return tier.aprPct;
+        }
+      }
+      return l.rateTiers[l.rateTiers.length - 1].aprPct;
+    };
+
     return [...eligibleLenders]
       .filter((l) => loanUsd >= l.minLoanUsd && ltvPct <= l.maxLtv)
       .map((l) => {
-        const midRate = (l.rateRange[0] + l.rateRange[1]) / 2;
+        const tieredRate = resolveApr(l, loanUsd);
+        // Regional rate adjustment: e.g. Strike charges +1% outside the US
+        const regional = l.regionalRateAdjustment
+          ? (l.regionalRateAdjustment[userRegion] ?? l.regionalRateAdjustment.default ?? 0)
+          : 0;
         const feeApplies = !l.feeWaivedFor.includes(userRegion);
-        const effectiveApr = midRate + (feeApplies ? l.originationFeePct : 0);
+        const effectiveApr = tieredRate + regional + (feeApplies ? l.originationFeePct : 0);
         const totalCost = computeInterest(loanUsd, effectiveApr, termMonths);
-        return { ...l, effectiveApr, totalCost };
+        return { ...l, effectiveApr, baseApr: tieredRate, regionalAdjustment: regional, totalCost };
       })
       .sort((a, b) => a.totalCost - b.totalCost)
       .slice(0, 4);
@@ -1032,7 +1065,10 @@ function Calculator() {
             <div className="headline-amount">{fmtSats(satsKept)}</div>
           </div>
           <div className="headline-detail">
-            ...that you'd otherwise sell. <span className="muted">At {profiles[activeProfile].name}'s {activeCase} case ({activeCagr > 0 ? "+" : ""}{activeCagr}% CAGR), those sats are worth </span>
+            ...that you'd otherwise sell. <span className="muted">{halMode
+              ? <>At Hal's $10M target ({halTargetYears}yr horizon, {activeCagr.toFixed(0)}% CAGR), those sats are worth </>
+              : <>At {profiles[activeProfile].name}'s {activeCase} case ({activeCagr > 0 ? "+" : ""}{activeCagr}% CAGR), those sats are worth </>
+            }</span>
             <span className="bright">{fmtFiatOutput(satsKeptFutureValueUsd)}</span>
             <span className="muted"> in {termMonths} months.</span>
           </div>
@@ -1069,42 +1105,56 @@ function Calculator() {
           </div>
         )}
 
-        {/* PROFILES */}
+        {/* PROFILES (or Hal Finney mode) */}
         <div className="card p-5 mb-4 anim-in" style={{ animationDelay: "240ms" }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "1rem" }}>
-            <div className="section-label">Projection profile</div>
-            <div style={{ fontSize: "0.625rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Geist Mono', monospace" }}>tap to switch</div>
-          </div>
-          <div className="profiles-grid">
-            {Object.entries(profiles).map(([key, p]) => (
-              <button key={key} onClick={() => setActiveProfile(key)} className={`profile-btn ${activeProfile === key ? "active" : ""}`}>
-                <div className="profile-avatar" style={{ borderColor: p.color, color: p.color }}>{p.initials}</div>
-                <div className="profile-name">{p.name}</div>
-                <div className="profile-persona">{p.persona}</div>
-                <div className="profile-cagr" style={{ color: p.color }}>
-                  {p.cases[activeCase] > 0 ? "+" : ""}{p.cases[activeCase]}%/yr
-                </div>
-              </button>
-            ))}
-          </div>
+          {halMode ? (
+            <HalFinneyProfile
+              btcSpotUsd={BTC_SPOT_USD}
+              targetYears={halTargetYears}
+              setTargetYears={setHalTargetYears}
+              onExit={() => {
+                setHalMode(false);
+                setProfiles(DEFAULT_PROFILES);
+              }}
+            />
+          ) : (
+            <>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "1rem" }}>
+                <div className="section-label">Projection profile</div>
+                <div style={{ fontSize: "0.625rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Geist Mono', monospace" }}>tap to switch</div>
+              </div>
+              <div className="profiles-grid">
+                {Object.entries(profiles).map(([key, p]) => (
+                  <button key={key} onClick={() => setActiveProfile(key)} className={`profile-btn ${activeProfile === key ? "active" : ""}`}>
+                    <div className="profile-avatar" style={{ borderColor: p.color, color: p.color }}>{p.initials}</div>
+                    <div className="profile-name">{p.name}</div>
+                    <div className="profile-persona">{p.persona}</div>
+                    <div className="profile-cagr" style={{ color: p.color }}>
+                      {p.cases[activeCase] > 0 ? "+" : ""}{p.cases[activeCase]}%/yr
+                    </div>
+                  </button>
+                ))}
+              </div>
 
-          {/* CASE PICKER (Bear / Base / Bull) */}
-          <div className="case-picker">
-            {["bear", "base", "bull"].map((c) => (
-              <button
-                key={c}
-                onClick={() => setActiveCase(c)}
-                className={`case-pill ${c} ${activeCase === c ? "active" : ""}`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
+              {/* CASE PICKER (Bear / Base / Bull) */}
+              <div className="case-picker">
+                {["bear", "base", "bull"].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setActiveCase(c)}
+                    className={`case-pill ${c} ${activeCase === c ? "active" : ""}`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
 
-          <div className="profile-blurb">"{profiles[activeProfile].blurb}"</div>
-          <button onClick={() => setEditingProfile(activeProfile)} className="profile-edit-link">
-            Edit {profiles[activeProfile].name}'s assumptions →
-          </button>
+              <div className="profile-blurb">"{profiles[activeProfile].blurb}"</div>
+              <button onClick={() => setEditingProfile(activeProfile)} className="profile-edit-link">
+                Edit {profiles[activeProfile].name}'s assumptions →
+              </button>
+            </>
+          )}
         </div>
 
         {/* CHART */}
@@ -1131,29 +1181,40 @@ function Calculator() {
                   contentStyle={{ background: "#0f0f10", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 12, fontFamily: "Geist Mono", fontSize: 11 }}
                   labelStyle={{ color: "rgba(255,255,255,0.6)" }}
                   formatter={(v, n) => {
-                    const m = { saylor: "Saylor", wood: "Wood", schiff: "Schiff", sell: "If sold" };
+                    const m = { saylor: "Saylor", wood: "Wood", schiff: "Schiff", hal: "Hal Finney", sell: "If sold" };
                     return [fmtFiatOutput(v), m[n] || n];
                   }}
                   labelFormatter={(m) => `Month ${m}`}
                 />
                 <ReferenceLine y={0} stroke="rgba(255,255,255,0.15)" strokeDasharray="2 2" />
-                {Object.entries(profiles).map(([key, p]) => (
-                  <Line key={key} type="monotone" dataKey={key} stroke={p.color}
-                    strokeWidth={key === activeProfile ? 2.5 : 1}
-                    strokeOpacity={key === activeProfile ? 1 : 0.4}
-                    dot={false} />
-                ))}
+                {halMode ? (
+                  <Line type="monotone" dataKey="hal" stroke="#f7931a" strokeWidth={2.5} dot={false} />
+                ) : (
+                  Object.entries(profiles).map(([key, p]) => (
+                    <Line key={key} type="monotone" dataKey={key} stroke={p.color}
+                      strokeWidth={key === activeProfile ? 2.5 : 1}
+                      strokeOpacity={key === activeProfile ? 1 : 0.4}
+                      dot={false} />
+                  ))
+                )}
                 <Line type="monotone" dataKey="sell" stroke="rgba(255,255,255,0.6)" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
           <div className="chart-legend">
-            {Object.entries(profiles).map(([key, p]) => (
-              <div key={key} className="legend-item">
-                <div className="legend-line" style={{ background: p.color }} />
-                <span>{p.name}</span>
+            {halMode ? (
+              <div className="legend-item">
+                <div className="legend-line" style={{ background: "#f7931a" }} />
+                <span>Hal Finney</span>
               </div>
-            ))}
+            ) : (
+              Object.entries(profiles).map(([key, p]) => (
+                <div key={key} className="legend-item">
+                  <div className="legend-line" style={{ background: p.color }} />
+                  <span>{p.name}</span>
+                </div>
+              ))
+            )}
             <div className="legend-item">
               <div className="legend-dashed" />
               <span>If you sold</span>
@@ -1240,6 +1301,11 @@ function Calculator() {
           profile={profiles[editingProfile]}
           btcSpotUsd={BTC_SPOT_USD}
           onSave={(updated) => {
+            // Easter egg trigger: bear/base/bull all set to 21 → Hal Finney mode
+            const cases = updated.cases;
+            if (cases && cases.bear === 21 && cases.base === 21 && cases.bull === 21) {
+              setHalMode(true);
+            }
             setProfiles({ ...profiles, [editingProfile]: { ...profiles[editingProfile], ...updated } });
             setEditingProfile(null);
           }}
@@ -1375,6 +1441,7 @@ function LenderCard({ lender, rank, userRegion, fmtFiatOutput }) {
         {expanded && (
           <div className="lender-detail">
             <DetailRow label="Custody" value={lender.custody} />
+            <DetailRow label="Repayment" value={lender.repayment} />
             <DetailRow label="Rollover" value={lender.rollover} />
             <DetailRow label="Min loan" value={`$${fmtNum(lender.minLoanUsd)}`} />
             <DetailRow label="Notes" value={lender.notes} />
@@ -1391,6 +1458,99 @@ function DetailRow({ label, value }) {
     <div className="lender-detail-item">
       <div className="lender-detail-label">{label}</div>
       <div className="lender-detail-value">{value}</div>
+    </div>
+  );
+}
+
+function HalFinneyProfile({ btcSpotUsd, targetYears, setTargetYears, onExit }) {
+  // Solve for the implied CAGR to reach $10M from current spot in `targetYears` years
+  const cagr = (Math.pow(10_000_000 / btcSpotUsd, 1 / targetYears) - 1) * 100;
+
+  return (
+    <div>
+      <style>{`
+        .hal-card {
+          padding: 1rem;
+          border-radius: 0.75rem;
+          background: linear-gradient(135deg, rgba(247, 147, 26, 0.08), rgba(247, 147, 26, 0.02));
+          border: 1px solid rgba(247, 147, 26, 0.3);
+          margin-bottom: 1rem;
+          display: flex; align-items: center; gap: 1rem;
+        }
+        .hal-avatar {
+          width: 3rem; height: 3rem; flex-shrink: 0;
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-family: 'Geist Mono', monospace;
+          font-size: 0.9375rem; font-weight: 700;
+          letter-spacing: 0.02em;
+          border: 2px solid #f7931a; color: #f7931a;
+          background: rgba(0,0,0,0.4);
+        }
+        .hal-name { font-family: 'Fraunces', serif; font-size: 1.125rem; font-weight: 600; color: #fff; line-height: 1; }
+        .hal-quote { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.8125rem; color: rgba(255,255,255,0.65); margin-top: 0.375rem; line-height: 1.4; }
+        .hal-target {
+          margin-top: 0.5rem; padding: 1rem;
+          border-radius: 0.75rem;
+          background: #0a0a0b;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+        .hal-target-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.625rem; }
+        .hal-target-label { font-size: 0.8125rem; color: rgba(255,255,255,0.8); }
+        .hal-target-value {
+          font-family: 'Geist Mono', monospace;
+          font-size: 1rem; font-weight: 600; color: #f7931a;
+          font-variant-numeric: tabular-nums;
+        }
+        .hal-target-derived {
+          margin-top: 0.625rem; font-size: 0.6875rem;
+          color: rgba(255,255,255,0.5);
+          font-family: 'Geist Mono', monospace;
+          font-variant-numeric: tabular-nums;
+        }
+        .hal-target-derived strong { color: #f7931a; font-weight: 600; }
+        .hal-exit {
+          margin-top: 0.875rem;
+          background: none; border: none; padding: 0;
+          font-size: 0.6875rem;
+          color: rgba(255,255,255,0.4);
+          text-decoration: underline; text-underline-offset: 2px;
+          cursor: pointer; font-family: inherit;
+          transition: color 150ms;
+        }
+        .hal-exit:hover { color: rgba(255,255,255,0.7); }
+      `}</style>
+
+      <div className="section-label" style={{ marginBottom: "0.875rem" }}>Running bitcoin.</div>
+
+      <div className="hal-card">
+        <div className="hal-avatar">HF</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="hal-name">Hal Finney</div>
+          <div className="hal-quote">"Imagine that Bitcoin is successful and becomes the dominant payment system in use throughout the world. Then the total value of the currency should be equal to the total value of all the wealth in the world... Even if the probability of Bitcoin succeeding to this degree is only 1 in 100, the expected value is around $10 million per coin." — January 11, 2009</div>
+        </div>
+      </div>
+
+      <div className="hal-target">
+        <div className="hal-target-header">
+          <label className="hal-target-label">$10M target horizon</label>
+          <span className="hal-target-value">{targetYears} years</span>
+        </div>
+        <input
+          className="slider"
+          type="range" min={5} max={20} step={1}
+          value={targetYears}
+          onChange={(e) => setTargetYears(parseInt(e.target.value, 10))}
+        />
+        <div className="slider-scale">
+          <span>5y</span><span>10y</span><span>15y</span><span>20y</span>
+        </div>
+        <div className="hal-target-derived">
+          Implied CAGR: <strong>{cagr.toFixed(1)}%/yr</strong>
+        </div>
+      </div>
+
+      <button className="hal-exit" onClick={onExit}>← Return to standard profiles</button>
     </div>
   );
 }
