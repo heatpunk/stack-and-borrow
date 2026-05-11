@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-09",
+  "lastUpdated": "2026-05-11",
   "lenders": [
     {
       "id": "ledn",
@@ -185,6 +185,50 @@
       "notes": "Institutional-grade multisig. P2P marketplace connecting borrowers with vetted lenders — rates vary 9–13% depending on loan. Strong custody model — no single party can move funds unilaterally.",
       "badge": "Institutional multisig",
       "referralUrl": "https://debifi.com"
+    },
+    {
+      "id": "xapo",
+      "name": "Xapo Bank",
+      "country": ["us", "eu", "ca", "ch", "global"],
+      "excluded": ["GB", "AU"],
+      "minLoanUsd": 1000,
+      "maxLtv": 40,
+      "rateTiers": [
+        { "maxLoanUsd": null, "aprPct": 10.0 }
+      ],
+      "originationFeePct": 0,
+      "feeWaivedFor": [],
+      "custody": "Held in segregated BTC Vault — never lent out, never rehypothecated. Licensed and regulated in Gibraltar as a private bank.",
+      "custodyType": "custodial",
+      "rehypothecation": "no",
+      "term": "30, 90, 180, or 365 days (extensions available case-by-case)",
+      "rollover": "Yes — loan can be extended once if LTV is healthy (≤45%)",
+      "repayment": "Variable interest rate that tracks Federal Reserve rates and updates daily. No fixed payment schedule — pay anytime during the term. Accrued interest is paid first, then principal. Repayable in USD. No early-repayment penalty. Liquidation triggers at 80% LTV; margin call at 65%.",
+      "notes": "Requires $1,000/year Xapo Bank membership (includes other banking services). Variable rate is unusual in BTC lending — pricing depends on Fed rates. Strong custody model with no rehypothecation. Maximum 1 active loan at a time. $1M max per loan, $5M with custom approval.",
+      "badge": "Bank-grade custody",
+      "referralUrl": "https://www.xapobank.com"
+    },
+    {
+      "id": "lava",
+      "name": "Lava",
+      "country": ["us", "global"],
+      "excluded": [],
+      "minLoanUsd": 100,
+      "maxLtv": 50,
+      "rateTiers": [
+        { "maxLoanUsd": null, "aprPct": 7.0 }
+      ],
+      "originationFeePct": 0,
+      "feeWaivedFor": [],
+      "custody": "Custodial since November 2025. Lava previously used Discreet Log Contracts (DLCs) for self-custody, but migrated to a custodial model to secure lower rates. No rehypothecation — collateral is held in segregated infrastructure with on-chain proof-of-reserves.",
+      "custodyType": "custodial",
+      "rehypothecation": "no",
+      "term": "Open-ended line of credit (BLOC) — no fixed maturity",
+      "rollover": "N/A — borrow and repay anytime, rate refreshes yearly",
+      "repayment": "No monthly payments required. Pay back any amount at any time, in any currency. Interest accrues only on borrowed amount, not on credit line capacity. Add or remove collateral anytime. Liquidation protection feature can draw from your in-app BTC balance to avoid forced sale.",
+      "notes": "5% fixed interest + 2% capital charge = 7% effective. Lowest fixed rates in the market. IMPORTANT: Lava migrated from self-custody (DLCs) to custodial in November 2025 — this was controversial among early users. Still no rehypothecation, but you now trust Lava with custody. Visa card available with up to 5% BTC cashback on spending.",
+      "badge": "Lowest rate",
+      "referralUrl": "https://www.lava.xyz"
     }
   ]
 }
