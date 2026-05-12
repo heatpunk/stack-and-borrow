@@ -111,6 +111,128 @@ const BitcoinLogo = ({ size = 40 }) => (
 // STYLES
 // ============================================================
 
+// ============================================================
+// BRAND STYLES — shared across calculator, strategy, about pages
+// Single source of truth for headers, page headings, footer, logo
+// ============================================================
+const BRAND_STYLES = `
+  /* Shared header with logo on all pages */
+  .brand-header {
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  .brand-header-strategy { max-width: 44rem; }
+  .brand-logo-svg { flex-shrink: 0; }
+  .brand-logo-text {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.015em;
+    line-height: 1;
+  }
+  .brand-logo-tagline {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.5625rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.18em;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+  }
+  .brand-logo-link { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.625rem; }
+
+  /* Page-level h1 — same on every page */
+  .brand-h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    color: #fff;
+    margin: 0 0 1rem;
+  }
+  .brand-h1 .accent { color: #f7931a; }
+
+  /* Section-level h2 — same on every page */
+  .brand-h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #fff;
+    line-height: 1.2;
+    margin: 2.5rem 0 1rem;
+  }
+  .brand-h2 .accent { color: #f7931a; }
+
+  /* Shared footer style — centered on all pages */
+  .brand-footer {
+    font-size: 0.625rem;
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    line-height: 1.7;
+    margin-top: 3rem;
+    padding-bottom: 1.5rem;
+  }
+  .brand-footer-links {
+    display: flex;
+    gap: 1.25rem;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+  .brand-footer-links a {
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: color 150ms;
+  }
+  .brand-footer-links a:hover { color: #f7931a; }
+  .brand-footer-meta { color: rgba(255,255,255,0.35); }
+  .brand-footer-disclaimer { color: rgba(255,255,255,0.3); margin-top: 0.5rem; }
+
+  /* Discreet live BTC price (no border/box, under currency picker) */
+  .live-price-discreet {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    font-size: 0.6875rem;
+    color: rgba(255,255,255,0.5);
+    font-family: 'Geist Mono', monospace;
+  }
+  .live-dot {
+    width: 0.375rem; height: 0.375rem;
+    border-radius: 50%;
+    background: #6ee7b7;
+  }
+  .live-dot.loading { background: #fbbf24; animation: pulse 1.5s ease-in-out infinite; }
+  .live-dot.error { background: #fca5a5; }
+  .live-label {
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.1em;
+  }
+  .live-value {
+    color: rgba(255,255,255,0.75);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .live-refresh {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0;
+    margin-left: 0.125rem;
+    transition: color 150ms;
+  }
+  .live-refresh:hover { color: #f7931a; }
+`;
+
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
 
@@ -123,7 +245,7 @@ const STYLES = `
     font-family: 'Geist', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  .bcalc-wrap { max-width: 28rem; margin: 0 auto; padding: 1.5rem 1rem 8rem; }
+  .bcalc-wrap { max-width: 28rem; margin: 0 auto; padding: 1rem 1rem 4rem; }
   .bcalc * { box-sizing: border-box; }
 
   .display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
@@ -323,31 +445,23 @@ const STYLES = `
   .text-red { color: #fca5a5; }
 
   .headline-cta {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: center;
     margin-top: 1rem; padding: 0.75rem 1rem;
     border-radius: 0.625rem;
-    background: rgba(247, 147, 26, 0.06);
-    border: 1px solid rgba(247, 147, 26, 0.2);
-    color: rgba(255, 255, 255, 0.85);
+    background: rgba(110, 231, 183, 0.08);
+    border: 1px solid rgba(110, 231, 183, 0.35);
+    color: #6ee7b7;
     text-decoration: none;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
+    text-align: center;
     transition: all 200ms;
-  }
-  .headline-cta strong {
-    color: #f7931a;
-    font-weight: 600;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-style: italic;
   }
   .headline-cta:hover {
-    background: rgba(247, 147, 26, 0.12);
-    border-color: rgba(247, 147, 26, 0.4);
-  }
-  .headline-cta-arrow {
-    color: #f7931a;
-    font-size: 1rem;
-    transition: transform 200ms;
-  }
-  .headline-cta:hover .headline-cta-arrow {
-    transform: translateX(3px);
+    background: rgba(110, 231, 183, 0.14);
+    border-color: rgba(110, 231, 183, 0.55);
   }
 
   /* HEADS-UP */
@@ -362,6 +476,31 @@ const STYLES = `
   .tone-warning { border-color: rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.08); color: #fef3c7; }
   .tone-danger { border-color: rgba(248, 113, 113, 0.4); background: rgba(248, 113, 113, 0.08); color: #fecaca; }
   .tone-good { border-color: rgba(110, 231, 183, 0.4); background: rgba(110, 231, 183, 0.08); color: #a7f3d0; }
+
+  /* Compact heads-up — translucent, single line */
+  .headsup-compact {
+    display: flex; align-items: center; gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    backdrop-filter: blur(8px);
+  }
+  .headsup-compact-icon {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.8125rem;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+  .headsup-compact-text {
+    flex: 1;
+    font-weight: 500;
+  }
+  .headsup-compact.tone-info { border-color: rgba(56, 189, 248, 0.25); background: rgba(56, 189, 248, 0.04); color: rgba(186, 230, 253, 0.9); }
+  .headsup-compact.tone-warning { border-color: rgba(251, 191, 36, 0.25); background: rgba(251, 191, 36, 0.04); color: rgba(254, 243, 199, 0.9); }
+  .headsup-compact.tone-danger { border-color: rgba(248, 113, 113, 0.3); background: rgba(248, 113, 113, 0.05); color: rgba(254, 202, 202, 0.95); }
+  .headsup-compact.tone-good { border-color: rgba(110, 231, 183, 0.25); background: rgba(110, 231, 183, 0.04); color: rgba(167, 243, 208, 0.9); }
 
   /* PROFILES */
   .profiles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; }
@@ -441,8 +580,8 @@ const STYLES = `
 
   /* METRICS GRID */
   .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
-  .metric-card { border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.1); background: #141417; padding: 0.875rem; }
-  .metric-card.warn { border-color: rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.05); }
+  .metric-card { padding: 0.875rem 0.5rem; }
+  .metric-card.warn { color: #fbbf24; }
   .metric-label { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); margin-bottom: 0.25rem; }
   .metric-value { font-family: 'Geist Mono', monospace; font-size: 0.875rem; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
   .metric-sub { font-size: 0.625rem; color: rgba(255,255,255,0.5); font-family: 'Geist Mono', monospace; margin-top: 0.125rem; }
@@ -478,7 +617,7 @@ const STYLES = `
     font-size: 0.6875rem; font-weight: 500;
     border: 1px solid;
   }
-  .pill-neutral { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.15); }
+  .pill-neutral { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.1); }
   .pill-orange { background: rgba(247, 147, 26, 0.15); color: #f7931a; border-color: rgba(247, 147, 26, 0.4); }
   .pill-warning { background: rgba(251, 191, 36, 0.15); color: #fde68a; border-color: rgba(251, 191, 36, 0.4); }
   .pill-good { background: rgba(110, 231, 183, 0.15); color: #6ee7b7; border-color: rgba(110, 231, 183, 0.4); }
@@ -613,59 +752,27 @@ const STYLES = `
 
   /* FOURTH DIMENSION CTA */
   .fourth-dim-cta {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-top: 1rem; padding: 1.25rem 1.25rem;
-    border-radius: 1rem;
-    background: linear-gradient(135deg, rgba(247, 147, 26, 0.12), rgba(247, 147, 26, 0.03));
-    border: 1px solid rgba(247, 147, 26, 0.35);
+    display: block;
+    margin-top: 1rem;
+    padding: 1.125rem 1.25rem;
+    border-radius: 0.75rem;
+    background: rgba(110, 231, 183, 0.08);
+    border: 1px solid rgba(110, 231, 183, 0.4);
     color: inherit;
     text-decoration: none;
     transition: all 200ms;
-    gap: 1rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .fourth-dim-cta::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 80% 50%, rgba(247, 147, 26, 0.15), transparent 60%);
-    pointer-events: none;
+    text-align: center;
   }
   .fourth-dim-cta:hover {
-    border-color: rgba(247, 147, 26, 0.6);
-    transform: translateY(-1px);
-  }
-  .fourth-dim-content { position: relative; z-index: 1; flex: 1; min-width: 0; }
-  .fourth-dim-eyebrow {
-    font-size: 0.625rem; text-transform: uppercase;
-    letter-spacing: 0.2em; color: rgba(247, 147, 26, 0.8);
-    font-weight: 500; margin-bottom: 0.375rem;
+    background: rgba(110, 231, 183, 0.14);
+    border-color: rgba(110, 231, 183, 0.6);
   }
   .fourth-dim-title {
     font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.25rem;
+    font-size: 1.0625rem;
     font-weight: 600;
-    color: #fff;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
-    margin-bottom: 0.375rem;
-  }
-  .fourth-dim-sub {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.65);
-    line-height: 1.45;
-  }
-  .fourth-dim-arrow {
-    color: #f7931a;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-    transition: transform 200ms;
-  }
-  .fourth-dim-cta:hover .fourth-dim-arrow {
-    transform: translateX(4px);
+    color: #6ee7b7;
+    letter-spacing: -0.005em;
   }
 
   /* EMPTY */
@@ -846,6 +953,48 @@ function useLenders() {
 // Top-level router: decides which page to render based on URL hash.
 // Using hash routing (#about) keeps things simple — no server config needed,
 // works on any static host.
+// Logo SVG inlined for instant render — bitcoin orange B in a circle
+function BrandLogo() {
+  return (
+    <svg className="brand-logo-svg" width="32" height="32" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="32" fill="#f7931a"/>
+      <path fill="#fff" d="M46.103 27.444c.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-.875-1.4 5.616c-.923-.23-1.871-.447-2.813-.662l1.41-5.653-3.51-.875-1.439 5.766c-.764-.174-1.514-.346-2.242-.527l.004-.018-4.842-1.209-.934 3.75s2.605.597 2.55.634c1.422.355 1.679 1.296 1.636 2.042l-1.638 6.571c.098.025.225.061.365.117-.117-.029-.242-.061-.371-.092l-2.296 9.205c-.174.432-.615 1.08-1.609.834.035.051-2.552-.637-2.552-.637l-1.743 4.019 4.569 1.139c.85.213 1.683.436 2.502.646l-1.453 5.835 3.508.875 1.439-5.772c.958.26 1.888.5 2.798.726l-1.434 5.745 3.511.875 1.453-5.823c5.987 1.133 10.489.676 12.384-4.739 1.527-4.36-.076-6.875-3.226-8.515 2.294-.529 4.022-2.038 4.483-5.155zm-8.022 11.249c-1.085 4.36-8.426 2.003-10.806 1.412l1.928-7.729c2.38.594 10.012 1.77 8.878 6.317zm1.086-11.312c-.99 3.966-7.1 1.951-9.082 1.457l1.748-7.01c1.982.494 8.365 1.416 7.334 5.553z"/>
+    </svg>
+  );
+}
+
+// Shared brand header — appears on every page. Logo links back to calculator.
+function BrandHeader({ wide = false }) {
+  return (
+    <div className={`brand-header ${wide ? "brand-header-strategy" : ""}`}>
+      <a href="#" className="brand-logo-link">
+        <BrandLogo />
+        <div>
+          <div className="brand-logo-text">Stack &amp; Borrow</div>
+          <div className="brand-logo-tagline">Keep your sats.</div>
+        </div>
+      </a>
+    </div>
+  );
+}
+
+// Shared footer used on all pages. Same links, same alignment.
+function BrandFooter({ extraMeta = null }) {
+  return (
+    <div className="brand-footer">
+      <div className="brand-footer-links">
+        <a href="#">Calculator</a>
+        <a href="#strategy">Strategy</a>
+        <a href="#about">About</a>
+      </div>
+      {extraMeta && <div className="brand-footer-meta">{extraMeta}</div>}
+      <div className="brand-footer-disclaimer">
+        Not financial advice. Verify lender terms before borrowing.
+      </div>
+    </div>
+  );
+}
+
 export default function Router() {
   const [route, setRoute] = useState(typeof window !== "undefined" ? window.location.hash : "");
 
@@ -870,21 +1019,22 @@ function Calculator() {
   // Default 50,000 SEK ≈ $4,700 — a meaningful amount for actual borrowing.
   const [currency, setCurrency] = usePersistentState("currency", detectCurrencyFromLocale());
   const [desiredLoanInCurrency, setDesiredLoanInCurrency] = usePersistentState("desiredLoan", 50000);
-  const [ltvPct, setLtvPct] = usePersistentState("ltvPct", 40);
-  const [aprPct, setAprPct] = usePersistentState("aprPct", 10);
-  const [termMonths, setTermMonths] = usePersistentState("termMonths", 12);
   const [activeProfile, setActiveProfile] = usePersistentState("activeProfile", "saylor");
   const [activeCase, setActiveCase] = usePersistentState("activeCase", "base");
   const [profiles, setProfiles] = usePersistentState("profiles", DEFAULT_PROFILES);
-  const [taxRate, setTaxRate] = usePersistentState("taxRate", null);
-  // Easter egg: Hal Finney mode. Activated when any profile has all 3 cases set to 21%.
-  // halTargetYears: how many years from now until BTC reaches $10M (Hal's prediction).
+  // Easter egg: Hal Finney mode.
   const [halMode, setHalMode] = usePersistentState("halMode", false);
   const [halTargetYears, setHalTargetYears] = usePersistentState("halTargetYears", 12);
   const [editingProfile, setEditingProfile] = useState(null);
   const [showLenders, setShowLenders] = useState(false);
 
-  const effectiveTaxRate = taxRate ?? CURRENCY_META[currency].taxRate;
+  // INTERNAL CONSTANTS — no longer user-controllable
+  // LTV fixed at 50% (industry standard middle ground)
+  // Term/APR derived from best-ranked lender for currency/region
+  // Tax rate derived from currency
+  const ltvPct = 50;
+  const termMonths = 12;
+  const effectiveTaxRate = CURRENCY_META[currency].taxRate;
 
   const usdToCurrency = useCallback((usd, c = currency) => {
     if (c === "SAT") return (usd / BTC_SPOT_USD) * SATS_PER_BTC;
@@ -948,27 +1098,20 @@ function Calculator() {
   const advantageUsd = borrowPathFutureNetUsd - sellPathFutureBtcValueUsd;
 
   // ===== HEADS-UPS =====
+  // LTV/Term/APR are now derived internally, so we focus on outcome-relevant warnings
   const headsUps = [];
-  if (ltvPct >= 60) {
-    headsUps.push({ tone: "danger", icon: "⚠", title: "High LTV — liquidation risk", detail: `BTC only needs to drop ${liquidationDropPct.toFixed(0)}% before liquidation. Historical drawdowns of 30–50% are normal.` });
-  } else if (ltvPct >= 50) {
-    headsUps.push({ tone: "warning", icon: "▲", title: "Elevated LTV", detail: `Liquidation triggers if BTC drops ~${liquidationDropPct.toFixed(0)}%. Many bitcoiners stay under 40% for buffer.` });
+  if (ltvPct >= 50 && liquidationDropPct < 35) {
+    headsUps.push({ tone: "warning", icon: "▲", title: `Liquidation if BTC drops ~${liquidationDropPct.toFixed(0)}%` });
   }
-  if (termMonths < 18) {
-    headsUps.push({ tone: "info", icon: "↻", title: "Term shorter than typical bull cycle", detail: `${termMonths} months may end before BTC's next cycle peak (~4yr cycle). Check rollover terms.` });
-  }
-  // Bear-case test using the schiff bear case as the harshest assumption
+  // Bear-case test
   const harshBearCagr = profiles.schiff.cases.bear;
   const bearFuturePrice = projectBtcPrice(BTC_SPOT_USD, harshBearCagr, termYears);
   const bearCollateralChangeUsd = (bearFuturePrice - BTC_SPOT_USD) * collateralBtcNeeded;
   if (interestUsd > Math.max(0, bearCollateralChangeUsd) && interestUsd > 0 && bearCollateralChangeUsd <= 0) {
-    headsUps.push({ tone: "warning", icon: "◯", title: "Bear case: interest exceeds appreciation", detail: `In a flat-to-down scenario, you'd pay ${fmtFiatOutput(interestUsd)} in interest while collateral stagnates or falls.` });
-  }
-  if (aprPct >= 14) {
-    headsUps.push({ tone: "warning", icon: "%", title: "High APR — verify it beats selling", detail: `At ${aprPct}% APR, the borrow path only wins if BTC outpaces the rate.` });
+    headsUps.push({ tone: "warning", icon: "◯", title: `Bear case: interest (${fmtFiatOutput(interestUsd)}) exceeds appreciation` });
   }
   if (advantageUsd < 0 && activeCagr >= 0) {
-    headsUps.push({ tone: "warning", icon: "✕", title: "Selling may be cheaper here", detail: "Under your current parameters, borrowing costs more than selling — even with tax. Try lowering APR, LTV, or shortening term." });
+    headsUps.push({ tone: "warning", icon: "✕", title: "Selling beats borrowing in this scenario" });
   }
 
   // ===== CHART DATA =====
@@ -1053,6 +1196,10 @@ function Calculator() {
       .slice(0, 4);
   }, [eligibleLenders, loanUsd, ltvPct, termMonths, userRegion]);
 
+  // APR is now inherited silently from the best-ranked lender.
+  // Users discover this by switching lenders to compare — increases engagement time.
+  const aprPct = rankedLenders[0]?.effectiveApr ?? 10;
+
   // For the input field: when SAT is selected currency, it doesn't make sense for "loan amount"
   // (you don't borrow sats — you borrow fiat). So we display USD as the loan unit if user picks SAT.
   const loanInputCurrency = currency === "SAT" ? "USD" : currency;
@@ -1075,30 +1222,20 @@ function Calculator() {
   return (
     <div className="bcalc">
       <style>{STYLES}</style>
+      <style>{BRAND_STYLES}</style>
+      <BrandHeader />
       <div className="bcalc-wrap">
-        {/* HEADER */}
-        <header className="header anim-in" style={{ animationDelay: "0ms" }}>
-          <div className="logo-row">
-            <div className="logo-icon-wrap"><BitcoinLogo size={40} /></div>
-            <div>
-              <div className="logo-title">Stack & Borrow</div>
-              <div className="logo-subtitle">Keep your sats. Free your cash.</div>
-            </div>
+        {/* CURRENCY PICKER with discreet live price */}
+        <div className="anim-in" style={{ animationDelay: "30ms", marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <CurrencyPicker currency={currency} setCurrency={setCurrency} />
           </div>
-          <CurrencyPicker currency={currency} setCurrency={setCurrency} />
-        </header>
-
-        {/* TICKER */}
-        <div className="ticker anim-in" style={{ animationDelay: "30ms" }}>
-          <div className="ticker-status">
-            <div className={`status-dot ${live.loading ? "loading" : live.error ? "error" : "live"}`} />
-            <span className="ticker-label">{live.loading ? "Fetching..." : live.error ? "Offline" : "Live"}</span>
+          <div className="live-price-discreet">
+            <span className={`live-dot ${live.loading ? "loading" : live.error ? "error" : "live"}`} />
+            <span className="live-label">BTC</span>
+            <span className="live-value">{fmtFiat(BTC_SPOT_USD / live.fxToUsd[fiatCurrency], fiatCurrency)}</span>
+            <button className="live-refresh" onClick={live.refresh} title="Refresh">↻</button>
           </div>
-          <div className="ticker-price">
-            <span className="ticker-tag">BTC</span>
-            <span className="ticker-value">{fmtFiat(BTC_SPOT_USD / live.fxToUsd[fiatCurrency], fiatCurrency)}</span>
-          </div>
-          <button className="ticker-refresh" onClick={live.refresh} title="Refresh">↻</button>
         </div>
 
         {/* INPUTS */}
@@ -1106,11 +1243,10 @@ function Calculator() {
           <div className="section-label" style={{ marginBottom: "1rem" }}>Your loan</div>
           <div className="input-stack">
 
-            {/* DESIRED LOAN AMOUNT (the new primary input) */}
+            {/* DESIRED LOAN AMOUNT */}
             <div className="input-row">
               <div className="input-header">
                 <label className="input-label">Loan amount</label>
-                <span className="input-meta">how much cash you want</span>
               </div>
               <NumInput
                 value={loanInputValue}
@@ -1118,56 +1254,18 @@ function Calculator() {
                 suffix={CURRENCY_META[loanInputCurrency].label}
               />
             </div>
-
-            {/* LTV */}
-            <div className="input-row">
-              <div className="input-header">
-                <label className="input-label">Loan-to-Value</label>
-                <span className="input-value-orange">{ltvPct}%</span>
-              </div>
-              <input className="slider" type="range" min={10} max={75} step={1} value={ltvPct} onChange={(e) => setLtvPct(parseFloat(e.target.value))} />
-              <div className="slider-scale">
-                <span>10%</span><span>conservative</span><span>aggressive</span><span>75%</span>
-              </div>
-            </div>
-
-            {/* APR */}
-            <div className="input-row">
-              <div className="input-header">
-                <label className="input-label">Interest rate (APR)</label>
-                <span className="input-value-orange">{aprPct.toFixed(1)}%</span>
-              </div>
-              <input className="slider" type="range" min={4} max={20} step={0.25} value={aprPct} onChange={(e) => setAprPct(parseFloat(e.target.value))} />
-            </div>
-
-            {/* Term */}
-            <div className="input-row">
-              <div className="input-header">
-                <label className="input-label">Term</label>
-                <span className="input-value-orange">{termMonths} months</span>
-              </div>
-              <div className="term-row">
-                {[6, 12, 18, 24, 36].map((m) => (
-                  <button key={m} onClick={() => setTermMonths(m)} className={`term-chip ${termMonths === m ? "active" : ""}`}>
-                    {m}m
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <TaxRateControl currency={currency} taxRate={taxRate} effectiveTaxRate={effectiveTaxRate} setTaxRate={setTaxRate} />
           </div>
         </div>
 
         {/* HEADLINE */}
         <div className="card headline-card mb-4 anim-in" style={{ animationDelay: "120ms" }}>
-          <div className="headline-eyebrow">If you borrow instead of sell</div>
+          <div className="headline-eyebrow">Sell or Borrow?</div>
           <div className="headline-glow">
             <div className="headline-keep">You keep</div>
             <div className="headline-amount">{fmtSats(satsKept)}</div>
           </div>
           <div className="headline-detail">
-            ...that you'd otherwise sell. <span className="muted">{halMode
+            ...if you borrow. <span className="muted">{halMode
               ? <>At Hal's $10M target ({halTargetYears}yr horizon, {activeCagr.toFixed(0)}% CAGR), those sats are worth </>
               : <>At {profiles[activeProfile].name}'s {activeCase} case ({activeCagr > 0 ? "+" : ""}{activeCagr}% CAGR), those sats are worth </>
             }</span>
@@ -1191,25 +1289,9 @@ function Calculator() {
             </div>
           </div>
           <a href="#strategy" className="headline-cta">
-            <span>What if you <strong>stack and borrow</strong> over time?</span>
-            <span className="headline-cta-arrow">→</span>
+            <span>What if you stack and borrow over time?</span>
           </a>
         </div>
-
-        {/* HEADS-UPS */}
-        {headsUps.length > 0 && (
-          <div className="stack-2 mb-4 anim-in" style={{ animationDelay: "180ms" }}>
-            {headsUps.map((h, i) => (
-              <div key={i} className={`headsup tone-${h.tone}`}>
-                <div className="headsup-icon">{h.icon}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="headsup-title">{h.title}</div>
-                  <div className="headsup-detail">{h.detail}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* PROFILES (or Hal Finney mode) */}
         <div className="card p-5 mb-4 anim-in" style={{ animationDelay: "240ms" }}>
@@ -1227,7 +1309,6 @@ function Calculator() {
             <>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "1rem" }}>
                 <div className="section-label">Projection profile</div>
-                <div style={{ fontSize: "0.625rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Geist Mono', monospace" }}>tap to switch</div>
               </div>
               <div className="profiles-grid">
                 {Object.entries(profiles).map(([key, p]) => (
@@ -1332,7 +1413,7 @@ function Calculator() {
         <div className="metric-grid anim-in" style={{ animationDelay: "360ms" }}>
           <div className="metric-card">
             <div className="metric-label">Collateral needed</div>
-            <div className="metric-value">{fmtSats(collateralSatsNeeded)}</div>
+            <div className="metric-value">{collateralBtcNeeded.toFixed(3)} BTC</div>
             <div className="metric-sub">{fmtFiatOutput(collateralUsdNeeded)}</div>
           </div>
           <div className={`metric-card ${liquidationDropPct < 30 ? "warn" : ""}`}>
@@ -1353,14 +1434,26 @@ function Calculator() {
         </div>
 
         {/* LENDERS */}
+        {/* HEADS-UPS — compact, translucent, above lenders button */}
+        {headsUps.length > 0 && (
+          <div className="stack-2 mb-4 anim-in" style={{ animationDelay: "400ms" }}>
+            {headsUps.map((h, i) => (
+              <div key={i} className={`headsup-compact tone-${h.tone}`}>
+                <span className="headsup-compact-icon">{h.icon}</span>
+                <span className="headsup-compact-text">{h.title}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <button onClick={() => setShowLenders(!showLenders)} className="lender-cta anim-in" style={{ animationDelay: "420ms" }}>
           <div className="lender-cta-row">
             <div>
               <div className="lender-cta-title">
-                {showLenders ? "Hide" : "Show"} {rankedLenders.length} matched lender{rankedLenders.length !== 1 ? "s" : ""}
+                {showLenders ? "Hide lenders" : `Show ${rankedLenders.length} matched lender${rankedLenders.length !== 1 ? "s" : ""}`}
               </div>
               <div className="lender-cta-sub">
-                Best fits for {CURRENCY_META[currency].label} · {ltvPct}% LTV · {termMonths}mo
+                Best fits for {CURRENCY_META[currency].label}
               </div>
             </div>
             <div className={`lender-cta-arrow ${showLenders ? "open" : ""}`}>↓</div>
@@ -1385,32 +1478,19 @@ function Calculator() {
 
         {/* FOURTH DIMENSION CTA */}
         <a href="#strategy" className="fourth-dim-cta anim-in" style={{ animationDelay: "480ms" }}>
-          <div className="fourth-dim-content">
-            <div className="fourth-dim-eyebrow">The full picture</div>
-            <div className="fourth-dim-title">Play with the fourth dimension</div>
-            <div className="fourth-dim-sub">A single loan is just a snapshot. Watch what happens when you keep borrowing — and stacking — over years.</div>
-          </div>
-          <div className="fourth-dim-arrow">→</div>
+          <div className="fourth-dim-title">What happens over time?</div>
         </a>
 
         {/* FOOTER */}
-        <div className="footer">
-          <div className="footer-row">
-            BTC spot via <span className="mono">{live.source}</span>
-            {live.updatedAt && <> · updated <span className="mono">{live.updatedAt.toLocaleTimeString()}</span></>}
-          </div>
-          <div className="footer-disclaimer">
-            Lender data {lendersLastUpdated ? <>last verified <span className="mono">{lendersLastUpdated}</span></> : "snapshot"} — verify current terms before borrowing.<br />
-            Some lender links are affiliate partnerships. Rankings computed purely from rate, fee, and term — never from commission.
-          </div>
-          <div className="footer-tiny" style={{ marginTop: "0.5rem" }}>
-            Not financial advice. Liquidation calc assumes 80% trigger LTV (varies by lender).
-          </div>
-          <div style={{ marginTop: "0.75rem", display: "flex", gap: "1.25rem", justifyContent: "center" }}>
-            <a href="#strategy" className="footer-strategy-link">How to stack and borrow →</a>
-            <a href="#about" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "underline", textUnderlineOffset: "2px" }}>About this site</a>
-          </div>
-        </div>
+        <BrandFooter
+          extraMeta={
+            <>
+              BTC via <span className="mono">{live.source}</span>
+              {live.updatedAt && <> · {live.updatedAt.toLocaleTimeString()}</>}
+              {lendersLastUpdated && <> · lender data <span className="mono">{lendersLastUpdated}</span></>}
+            </>
+          }
+        />
       </div>
 
       {editingProfile && (
@@ -1528,7 +1608,7 @@ function LenderCard({ lender, rank, userRegion, fmtFiatOutput }) {
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
               <div className="lender-rank">#{rank}</div>
               <div className="lender-name">{lender.name}</div>
-              {lender.badge && <span className="pill pill-orange">{lender.badge}</span>}
+              {lender.badge && <span className="pill pill-neutral">{lender.badge}</span>}
             </div>
             <div className="lender-term">{lender.term}</div>
           </div>
@@ -1732,11 +1812,13 @@ function AboutPage() {
   return (
     <div className="bcalc">
       <style>{STYLES}</style>
+      <style>{BRAND_STYLES}</style>
+      <BrandHeader />
       <style>{`
         .about-content {
           max-width: 32rem;
           margin: 0 auto;
-          padding: 2rem 1.25rem 6rem;
+          padding: 2rem 1.25rem 4rem;
         }
         .about-back {
           display: inline-flex;
@@ -1829,15 +1911,13 @@ function AboutPage() {
       `}</style>
 
       <div className="about-content">
-        <a href="#" className="about-back">← Back to calculator</a>
-
-        <h1 className="about-h1">About Stack & Borrow</h1>
+        <h1 className="brand-h1">About <span className="accent">Stack &amp; Borrow</span></h1>
         <div className="about-subtitle">
           A calculator built for one question every long-term bitcoiner eventually faces:
           should I sell some sats, or borrow against them?
         </div>
 
-        <h2 className="about-h2">Why this exists</h2>
+        <h2 className="brand-h2">Why this exists</h2>
         <p className="about-p">
           Most "bitcoin loan calculators" online are one of two things: broken (wrong math, no tax handling, no live prices), or thinly disguised affiliate funnels (rankings tilted toward whoever pays the highest commission). Neither is useful when you're making a real financial decision involving years of stacking.
         </p>
@@ -1845,7 +1925,7 @@ function AboutPage() {
           Stack & Borrow tries to be the calculator I wished existed when I started looking into this. <strong>Sats are the unit.</strong> The headline number is how many sats you avoid having to sell. Tax is part of the math by default, because in most jurisdictions selling triggers a real cost that borrowing doesn't. Multiple price scenarios — from genuine bull-case views to the comedic permabear — let you stress-test instead of relying on a single forecast.
         </p>
 
-        <h2 className="about-h2">How <span className="accent">rankings</span> work</h2>
+        <h2 className="brand-h2">How <span className="accent">rankings</span> work</h2>
         <p className="about-p">
           Lenders are ranked by <strong>total cost to you</strong> for the loan parameters you set. Effective APR includes the lender's interest rate plus any origination fee, multiplied by your loan term. Lowest cost wins. That's it.
         </p>
@@ -1853,18 +1933,15 @@ function AboutPage() {
           Affiliate commissions never enter the ranking algorithm. If a lender that pays me nothing offers you the best deal, they win the #1 slot. Period.
         </p>
 
-        <h2 className="about-h2">How the site is <span className="accent">funded</span></h2>
+        <h2 className="brand-h2">How the site is <span className="accent">funded</span></h2>
         <p className="about-p">
           Some lender links in the directory are affiliate partnerships. When you click "Visit [Lender]" and end up taking a loan, the lender pays a referral fee. This funds the domain, hosting, and time spent maintaining the data.
-        </p>
-        <p className="about-p">
-          Currently I'm an affiliate of <strong>Firefish</strong>, with applications pending at <strong>Ledn</strong>, <strong>Arch</strong>, and <strong>Strike</strong>. The other lenders on the site receive no commission from me; they're listed because they belong on a credible directory of BTC-backed lenders.
         </p>
         <p className="about-p">
           If you'd rather not use an affiliate link, you can always navigate to the lender's site directly. The ranking and the math don't change either way.
         </p>
 
-        <h2 className="about-h2">What the site does <span className="accent">not</span> do</h2>
+        <h2 className="brand-h2">What the site does <span className="accent">not</span> do</h2>
         <ul className="about-list">
           <li><strong>No tracking.</strong> No Google Analytics, no Meta pixel, no third-party advertising scripts. Privacy-respecting analytics may be added (Plausible or self-hosted Umami) — clearly disclosed if so.</li>
           <li><strong>No signup required.</strong> The calculator works without an account, ever.</li>
@@ -1872,7 +1949,7 @@ function AboutPage() {
           <li><strong>No financial advice.</strong> This is a calculator, not a recommendation. Borrowing against bitcoin involves liquidation risk, custody risk, counterparty risk, and tax complexity that varies by jurisdiction. Talk to a qualified advisor before making decisions involving meaningful money.</li>
         </ul>
 
-        <h2 className="about-h2">Who should <span className="accent">not</span> use this</h2>
+        <h2 className="brand-h2">Who should <span className="accent">not</span> use this</h2>
         <p className="about-p">
           Borrowing against bitcoin is a tool. Like all tools, it's wrong for many situations. Don't borrow against sats if:
         </p>
@@ -1883,7 +1960,7 @@ function AboutPage() {
           <li>Your job, savings, or emotional well-being depends on the BTC price not falling for the next 12 months</li>
         </ul>
 
-        <h2 className="about-h2">Lender data <span className="accent">freshness</span></h2>
+        <h2 className="brand-h2">Lender data <span className="accent">freshness</span></h2>
         <p className="about-p">
           Rates and terms change. The footer of the calculator shows when lender data was last verified. The goal is quarterly updates at minimum — when a major change happens (a lender shuts down, a new partner launches, regulatory changes), updates happen sooner.
         </p>
@@ -1891,7 +1968,7 @@ function AboutPage() {
           If you spot something out of date or wrong, please reach out — fixing it benefits everyone.
         </p>
 
-        <h2 className="about-h2">Open source & <span className="accent">honest about limits</span></h2>
+        <h2 className="brand-h2">Open source & <span className="accent">honest about limits</span></h2>
         <p className="about-p">
           The site's source code is public on GitHub. The math is verifiable. The calculations are not magic — they're simple interest calculations and CAGR projections you could do in a spreadsheet. The value is in having them organized, with live BTC prices and lender data, in one place that doesn't waste your time.
         </p>
@@ -1906,85 +1983,68 @@ function AboutPage() {
           Live BTC price via <a href="https://mempool.space" target="_blank" rel="noopener noreferrer">mempool.space</a> — itself a free public good worth supporting.<br /><br />
           Found something out of date or wrong? <a href="mailto:feedback@stackandborrow.com">feedback@stackandborrow.com</a>
         </p>
-
-        <div style={{ marginTop: "2rem" }}>
-          <a href="#" className="about-back">← Back to calculator</a>
-        </div>
+      </div>
+      <div style={{ maxWidth: "32rem", margin: "0 auto", padding: "0 1.25rem" }}>
+        <BrandFooter />
       </div>
     </div>
   );
 }
 
 
+
 // ============================================================
-// STRATEGY PAGE
-// "Play with the fourth dimension" — multi-year simulation
+// STRATEGY PAGE — focused, single-purpose, intuitive
 // ============================================================
 
-// Tax jurisdiction profiles for strategy estimation.
-const TAX_JURISDICTIONS = {
-  US: {
-    label: "United States",
-    capitalGainsPct: 20,
-    hasStepUpBasis: true,
-    note: "Capital gains 20% for long-term holdings. Step-up basis at death zeroes out CGT for heirs.",
-  },
-  SE: {
-    label: "Sweden",
-    capitalGainsPct: 30,
-    hasStepUpBasis: false,
-    note: "Capital gains taxed at 30% as capital income. No step-up basis — heirs inherit your cost basis.",
-  },
-  EU: {
-    label: "EU (general)",
-    capitalGainsPct: 26,
-    hasStepUpBasis: false,
-    note: "Average EU rate ~26%. Most EU countries do not have step-up basis at inheritance.",
-  },
-  UK: {
-    label: "United Kingdom",
-    capitalGainsPct: 20,
-    hasStepUpBasis: true,
-    note: "Capital gains 20% (higher rate). Inheritance receives stepped-up base cost.",
-  },
-  CH: {
-    label: "Switzerland",
-    capitalGainsPct: 0,
-    hasStepUpBasis: true,
-    note: "No capital gains tax on private wealth. The Buy-Borrow-Live strategy is most powerful here.",
-  },
-  CA: {
-    label: "Canada",
-    capitalGainsPct: 25,
-    hasStepUpBasis: false,
-    note: "50% of capital gains taxed at marginal rate (~25% effective). Deemed disposition at death.",
-  },
-};
-
-const SB_GRADES = {
-  ledn: { grade: "B+", color: "#22d3ee", note: "12-mo terms, no monthly payments, rollover supported but not guaranteed. Best-in-class operational track record." },
-  strike: { grade: "B+", color: "#22d3ee", note: "12-mo terms, zero fees on rollover, multiple loan slots. Refinancing has minimal friction." },
-  arch: { grade: "B", color: "#22d3ee", note: "12-mo terms with tier-based fees that drop for larger loans. Refinancing supported but each new loan triggers origination fee in <$750K tier." },
-  figure: { grade: "C", color: "#fbbf24", note: "75% LTV is aggressive for long-term strategy — bear-market liquidation risk too high to sustain over decades." },
-  milo: { grade: "B", color: "#22d3ee", note: "Big-ticket lender with deferred-payment option that fits long-term strategy. $75K minimum is a barrier." },
-  unchained: { grade: "N/A", color: "#94a3b8", note: "Business-only since 2024. Not applicable for individual long-term wealth strategy." },
-  firefish: { grade: "B+", color: "#22d3ee", note: "P2P marketplace means each new loan is independent — no rollover guarantee, but new terms can be negotiated. Best EU option." },
-  debifi: { grade: "B+", color: "#22d3ee", note: "Multisig custody supports long-term strategy psychologically. 3-12 month terms require active refinancing." },
-  xapo: { grade: "B", color: "#22d3ee", note: "Flexible terms (30-365 days), bank-grade custody, but $1000/year membership adds friction. Variable rate is unusual." },
-};
-
-function detectJurisdiction() {
-  if (typeof navigator === "undefined") return "US";
-  const locale = navigator.language || "en-US";
-  const country = locale.split("-")[1]?.toUpperCase() || "";
+// Maps currency to tax/jurisdiction info used internally (never shown directly)
+function inferJurisdictionFromCurrency(currency) {
   const map = {
-    US: "US", SE: "SE", GB: "UK", UK: "UK",
-    CH: "CH", LI: "CH", CA: "CA",
-    DE: "EU", FR: "EU", IT: "EU", ES: "EU", NL: "EU", BE: "EU",
-    AT: "EU", PT: "EU", IE: "EU", FI: "EU", DK: "EU", NO: "EU",
-    PL: "EU", CZ: "EU",
+    USD: { capitalGainsPct: 20, label: "US" },
+    SEK: { capitalGainsPct: 30, label: "SE" },
+    EUR: { capitalGainsPct: 26, label: "EU" },
+    GBP: { capitalGainsPct: 20, label: "UK" },
+    CHF: { capitalGainsPct: 0,  label: "CH" },
+    CAD: { capitalGainsPct: 25, label: "CA" },
+    AUD: { capitalGainsPct: 22, label: "AU" },
+    JPY: { capitalGainsPct: 20, label: "JP" },
+    SAT: { capitalGainsPct: 0,  label: "—" },
   };
-  return map[country] || "US";
+  return map[currency] || map.USD;
+}
+
+// Picks the best-ranked lender for a given currency/region.
+// Used by strategy to inherit APR and term silently.
+function pickBestLender(lenders, currency, regionLabel) {
+  // Map currency to region used in lender.country arrays
+  const regionMap = {
+    USD: "us", SEK: "eu", EUR: "eu", GBP: "uk",
+    CHF: "ch", CAD: "ca", AUD: "au", JPY: "global", SAT: "global",
+  };
+  const region = regionMap[currency] || "global";
+  const eligible = lenders.filter(l =>
+    l.country.includes(region) || l.country.includes("global")
+  );
+  // Sort by lowest APR in entry tier
+  return eligible.sort((a, b) => {
+    const aRate = a.rateTiers?.[0]?.aprPct ?? 99;
+    const bRate = b.rateTiers?.[0]?.aprPct ?? 99;
+    return aRate - bRate;
+  })[0] || lenders[0];
+}
+
+// Generates a slightly uneven, intuitive-feeling BTC price curve over N years.
+// Real bitcoin price doesn't follow a smooth CAGR — it cycles. We bake in mild
+// 4-year cycles around the long-term CAGR to make the chart feel realistic.
+function generatePriceCurve(spotUsd, cagrPct, years) {
+  const points = [];
+  for (let y = 0; y <= years; y++) {
+    const trend = spotUsd * Math.pow(1 + cagrPct / 100, y);
+    // Add a sine wobble with ~4-year period, ~15% amplitude
+    const wobble = 1 + Math.sin((y / 4) * Math.PI * 2) * 0.15;
+    points.push(trend * wobble);
+  }
+  return points;
 }
 
 function StrategyPage() {
@@ -1992,1184 +2052,454 @@ function StrategyPage() {
   const { lenders: LENDERS } = useLenders();
   const BTC_SPOT_USD = live.btcUsd;
 
-  const [totalSats, setTotalSats] = usePersistentState("strat.totalSats", 500_000_000);
-  const [coldPct, setColdPct] = usePersistentState("strat.coldPct", 60);
-  const [bridgePct, setBridgePct] = usePersistentState("strat.bridgePct", 15);
-  const [annualIncomeUsd, setAnnualIncomeUsd] = usePersistentState("strat.annualIncome", 30000);
-  const [selectedLenderId, setSelectedLenderId] = usePersistentState("strat.lender", "ledn");
-  const [cagrPct, setCagrPct] = usePersistentState("strat.cagr", 30);
-  const [horizonYears, setHorizonYears] = usePersistentState("strat.horizon", 10);
-  const [jurisdiction, setJurisdiction] = usePersistentState("strat.jurisdiction", detectJurisdiction());
-  const [ltvTarget, setLtvTarget] = usePersistentState("strat.ltvTarget", 40);
-  const [showRiskMode, setShowRiskMode] = useState("normal");
+  // Inherit currency from calculator. If not set, fall back to locale.
+  const [currency] = usePersistentState("currency", detectCurrencyFromLocale());
+  // Inherit projection profile from calculator
+  const [activeProfile] = usePersistentState("activeProfile", "saylor");
+  const [activeCase] = usePersistentState("activeCase", "base");
+  const [profiles] = usePersistentState("profiles", DEFAULT_PROFILES);
 
-  const collateralPct = Math.max(0, 100 - coldPct - bridgePct);
-  const lender = LENDERS.find((l) => l.id === selectedLenderId) || LENDERS[0];
-  const lenderApr = lender?.rateTiers?.[0]?.aprPct ?? 10;
-  const lenderOrigFee = lender?.rateTiers?.[0]?.originationFeePct ?? lender?.originationFeePct ?? 0;
-  const grade = SB_GRADES[selectedLenderId] || { grade: "?", color: "#94a3b8", note: "" };
-  const tax = TAX_JURISDICTIONS[jurisdiction] || TAX_JURISDICTIONS.US;
+  // The ONLY user input on this page
+  const [annualDrawCurrency, setAnnualDrawCurrency] = usePersistentState(
+    "strat.annualDraw",
+    currency === "SEK" ? 200000 : currency === "EUR" ? 20000 : 25000
+  );
 
-  const coldSats = Math.round(totalSats * (coldPct / 100));
-  const bridgeSats = Math.round(totalSats * (bridgePct / 100));
-  const collateralSats = totalSats - coldSats - bridgeSats;
+  // Derived: jurisdiction, lender, APR, LTV (all silently inherited)
+  const juri = inferJurisdictionFromCurrency(currency);
+  const lender = pickBestLender(LENDERS, currency, juri.label);
+  const aprPct = lender?.rateTiers?.[0]?.aprPct ?? 10;
+  const LTV_INTERNAL = 50; // fixed 50% — not shown to user
+  const cagrPct = profiles[activeProfile]?.cases[activeCase] ?? 30;
 
-  const simulation = useMemo(() => {
-    const years = [];
+  // Convert annual draw to USD for math
+  const fxToUsd = live.fxToUsd?.[currency] ?? 1;
+  const annualDrawUsd = currency === "SAT"
+    ? (annualDrawCurrency / SATS_PER_BTC) * BTC_SPOT_USD
+    : currency === "USD"
+      ? annualDrawCurrency
+      : annualDrawCurrency * fxToUsd;
+
+  // ============== SIMULATION ==============
+  // Standard buy-borrow-live: each year, take a new loan = previous debt + new draw + origination
+  // Track collateral need vs available. The user starts with "just enough" stack to support this.
+  const sim = useMemo(() => {
+    const HORIZON = 30;
+    const priceCurve = generatePriceCurve(BTC_SPOT_USD, cagrPct, HORIZON);
+    const points = [];
     let outstandingDebt = 0;
-    let coldSatsRem = coldSats;
-    let bridgeSatsRem = bridgeSats;
-    let collateralSatsRem = collateralSats;
-    let cumExtractedUsd = 0;
-    let bridgeRunOutYear = null;
-    let liquidationYear = null;
-    let strategyFailed = false;
-    let totalInterestPaid = 0;
-    let totalOriginationPaid = 0;
 
-    let bearStartYear = null;
-    if (showRiskMode === "bear") {
-      bearStartYear = Math.floor(horizonYears / 3);
-    }
+    // Compute initial stack needed at year 0 to support strategy at chosen LTV
+    // Loan size year 1 = annualDrawUsd; collateral needed = annualDrawUsd / (LTV/100)
+    // We need at least that much, plus 50% buffer
+    const initialStackUsd = (annualDrawUsd / (LTV_INTERNAL / 100)) * 1.5;
+    const initialStackSats = (initialStackUsd / BTC_SPOT_USD) * SATS_PER_BTC;
 
-    for (let y = 0; y <= horizonYears; y++) {
-      let yearCagr = cagrPct;
-      if (showRiskMode === "bear" && y >= bearStartYear && y < bearStartYear + 3) {
-        yearCagr = -30;
-      }
+    for (let y = 0; y <= HORIZON; y++) {
+      const priceUsd = priceCurve[y];
+      const newLoan = y === 0 ? 0 : annualDrawUsd + outstandingDebt;
+      const interest = newLoan * (aprPct / 100);
+      outstandingDebt = newLoan + interest;
 
-      const priceUsd = y === 0
-        ? BTC_SPOT_USD
-        : years[y - 1].priceUsd * (1 + yearCagr / 100);
+      const stackValueUsd = (initialStackSats / SATS_PER_BTC) * priceUsd;
+      const netWorthUsd = stackValueUsd - outstandingDebt;
 
-      const newLoanNeeded = y === 0 ? 0 : annualIncomeUsd + outstandingDebt;
-      const origFee = newLoanNeeded * (lenderOrigFee / 100);
-      const grossNewLoan = newLoanNeeded + origFee;
-      const collateralValueUsdRequired = grossNewLoan / (ltvTarget / 100);
-      const collateralSatsRequired = (collateralValueUsdRequired / priceUsd) * SATS_PER_BTC;
-
-      if (y > 0 && collateralSatsRequired > collateralSatsRem) {
-        const shortfallSats = collateralSatsRequired - collateralSatsRem;
-        if (shortfallSats <= bridgeSatsRem) {
-          bridgeSatsRem -= shortfallSats;
-          collateralSatsRem += shortfallSats;
-          if (bridgeRunOutYear === null && bridgeSatsRem < bridgeSats * 0.1) {
-            bridgeRunOutYear = y;
-          }
-        } else {
-          if (bridgeRunOutYear === null) bridgeRunOutYear = y;
-          collateralSatsRem += bridgeSatsRem;
-          bridgeSatsRem = 0;
-          if (collateralSatsRem < collateralSatsRequired) {
-            strategyFailed = true;
-            if (liquidationYear === null) liquidationYear = y;
-          }
-        }
-      }
-
-      const interestThisYear = y === 0 ? 0 : newLoanNeeded * (lenderApr / 100);
-      outstandingDebt = grossNewLoan + interestThisYear;
-
-      if (y > 0) {
-        cumExtractedUsd += annualIncomeUsd;
-        totalInterestPaid += interestThisYear;
-        totalOriginationPaid += origFee;
-      }
-
-      if (showRiskMode === "lenderfail" && y === Math.floor(horizonYears * 0.65)) {
-        if (liquidationYear === null) liquidationYear = y;
-        collateralSatsRem = 0;
-      }
-
-      years.push({
+      points.push({
         year: y,
         priceUsd,
+        stackValueUsd,
         outstandingDebt,
-        coldSats: coldSatsRem,
-        bridgeSats: bridgeSatsRem,
-        collateralSats: collateralSatsRem,
-        collateralValueUsd: (collateralSatsRem / SATS_PER_BTC) * priceUsd,
-        coldValueUsd: (coldSatsRem / SATS_PER_BTC) * priceUsd,
-        bridgeValueUsd: (bridgeSatsRem / SATS_PER_BTC) * priceUsd,
-        totalStackValueUsd: ((coldSatsRem + bridgeSatsRem + collateralSatsRem) / SATS_PER_BTC) * priceUsd,
-        netWorthUsd: ((coldSatsRem + bridgeSatsRem + collateralSatsRem) / SATS_PER_BTC) * priceUsd - outstandingDebt,
-        cumExtractedUsd,
-        cagrThisYear: yearCagr,
+        netWorthUsd,
       });
     }
+    return { points, initialStackSats, initialStackUsd };
+  }, [BTC_SPOT_USD, cagrPct, aprPct, annualDrawUsd]);
 
-    return {
-      years,
-      bridgeRunOutYear,
-      liquidationYear,
-      strategyFailed,
-      finalNetWorth: years[years.length - 1].netWorthUsd,
-      totalExtracted: cumExtractedUsd,
-      totalInterestPaid,
-      totalOriginationPaid,
-      finalStackSats: years[years.length - 1].coldSats + years[years.length - 1].bridgeSats + years[years.length - 1].collateralSats,
-    };
-  }, [totalSats, coldSats, bridgeSats, collateralSats, annualIncomeUsd, lenderApr, lenderOrigFee, cagrPct, horizonYears, ltvTarget, showRiskMode, BTC_SPOT_USD]);
+  // Currency formatting helper for this page
+  const fmtCur = (usdAmount) => {
+    if (currency === "SAT") {
+      return `${fmtSats((usdAmount / BTC_SPOT_USD) * SATS_PER_BTC)} sats`;
+    }
+    if (currency === "USD") return fmtFiat(usdAmount, "USD");
+    const local = usdAmount * fxToUsd;
+    return fmtFiat(local, currency);
+  };
 
-  const final = simulation.years[simulation.years.length - 1];
+  // Get net worth at specific year markers
+  const markers = [2, 5, 10, 30].map(y => ({
+    year: y,
+    netWorth: sim.points[y]?.netWorthUsd ?? 0,
+    stackValue: sim.points[y]?.stackValueUsd ?? 0,
+  }));
 
   const purgeAll = () => {
     if (typeof window !== "undefined") {
-      ["totalSats","coldPct","bridgePct","annualIncome","lender","cagr","horizon","jurisdiction","ltvTarget"]
-        .forEach(k => window.localStorage.removeItem(`stackandborrow:strat.${k}`));
+      window.localStorage.removeItem("stackandborrow:strat.annualDraw");
       window.location.reload();
     }
   };
 
+  // Monthly self-paycheck
+  const monthlyDraw = annualDrawCurrency / 12;
+  const monthlyDrawDisplay = currency === "SAT"
+    ? `${fmtSats(Math.round(monthlyDraw))} sats`
+    : fmtFiat(monthlyDraw, currency === "SAT" ? "USD" : currency);
+
   return (
     <div className="bcalc">
       <style>{STYLES}</style>
-      <style>{STRATEGY_STYLES}</style>
+      <style>{BRAND_STYLES}</style>
+      <style>{STRAT_STYLES}</style>
+
+      <BrandHeader wide />
 
       <div className="strat-wrap">
-        <a href="#" className="strat-back">← Back to calculator</a>
-
-        <header className="strat-header">
-          <div className="strat-eyebrow">The Strategy</div>
-          <h1 className="strat-title">Stack & Borrow</h1>
-          <p className="strat-subtitle">
-            What if you never sold? What if you kept stacking <em>while</em> borrowing — for a year, a decade, a generation?
-            The math is unintuitive. Let's run it.
+        {/* HEADLINE */}
+        <header className="strat-intro">
+          <h1 className="brand-h1">
+            Stack <span className="accent">and</span> Borrow
+          </h1>
+          <p className="strat-lede">
+            What if you never sold? Set how much you want each year, watch what happens to the rest.
           </p>
         </header>
 
-        <section className="strat-section">
-          <div className="strat-section-eyebrow">The Premise</div>
-          <h2 className="strat-h2">Split your stack into three roles</h2>
-          <p className="strat-p">
-            Most bitcoiners hear "borrow against bitcoin" and recoil — and they're right to.
-            Handing your entire stack to a third party defeats the point of holding bitcoin in the first place.
-          </p>
-          <p className="strat-p">
-            The strategy below assumes you <strong>don't</strong>. Instead, you split your stack into three parts,
-            each with a different job. <strong>Most of it stays in self-custody. Forever. Untouched.</strong>
-          </p>
-
-          <div className="strat-stack-viz">
-            <StackAllocator
-              coldPct={coldPct}
-              bridgePct={bridgePct}
-              collateralPct={collateralPct}
-              onChange={(newCold, newBridge) => {
-                setColdPct(newCold);
-                setBridgePct(newBridge);
-              }}
-            />
-          </div>
-
-          <div className="strat-stack-explainer">
-            <div className="strat-role">
-              <div className="strat-role-dot" style={{ background: "#f7931a" }} />
-              <div>
-                <div className="strat-role-title">Cold storage ({coldPct}%)</div>
-                <div className="strat-role-text">
-                  Hardware wallet. Seed phrase backed up. Never touched. This is what makes you a bitcoiner —
-                  not a speculator. Even if every lender fails, this remains yours.
-                </div>
-              </div>
-            </div>
-            <div className="strat-role">
-              <div className="strat-role-dot" style={{ background: "#22d3ee" }} />
-              <div>
-                <div className="strat-role-title">Bridge stack ({bridgePct}%)</div>
-                <div className="strat-role-text">
-                  Still self-custodied. Used to top up collateral if BTC price drops sharply,
-                  or to pay off a loan early if a lender becomes unreliable. Your insurance policy.
-                </div>
-              </div>
-            </div>
-            <div className="strat-role">
-              <div className="strat-role-dot" style={{ background: "#94a3b8" }} />
-              <div>
-                <div className="strat-role-title">Working collateral ({collateralPct}%)</div>
-                <div className="strat-role-text">
-                  The only portion that touches a lender. Posted as collateral against loans.
-                  If catastrophe strikes — only this slice is exposed.
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="strat-section">
-          <div className="strat-section-eyebrow">The Simulation</div>
-          <h2 className="strat-h2">Set your parameters</h2>
-          <p className="strat-p">Live numbers below update as you adjust. Try different scenarios.</p>
-
-          <div className="strat-controls">
-            <div className="strat-control">
-              <div className="strat-control-header">
-                <label>Total stack</label>
-                <span className="strat-control-meta">{fmtSats(totalSats)}</span>
-              </div>
-              <NumInput
-                value={totalSats}
-                onChange={(v) => setTotalSats(Math.round(v))}
-                suffix="sats"
-              />
-            </div>
-
-            <div className="strat-control">
-              <div className="strat-control-header">
-                <label>Annual income you want (USD)</label>
-                <span className="strat-control-value-orange">${fmtNum(annualIncomeUsd)}</span>
-              </div>
-              <input
-                className="slider"
-                type="range"
-                min={6000} max={500000} step={1000}
-                value={annualIncomeUsd}
-                onChange={(e) => setAnnualIncomeUsd(parseInt(e.target.value))}
-              />
-              <div className="strat-control-help">
-                Your annual "self-paycheck" — what you live on per year.
-                Most extract it once a year and self-discipline a monthly draw.
-              </div>
-            </div>
-
-            <div className="strat-control">
-              <div className="strat-control-header">
-                <label>Loan-to-Value target</label>
-                <span className="strat-control-value-orange">{ltvTarget}%</span>
-              </div>
-              <input
-                className="slider"
-                type="range"
-                min={20} max={55} step={1}
-                value={ltvTarget}
-                onChange={(e) => setLtvTarget(parseInt(e.target.value))}
-              />
-              <div className="strat-control-help">
-                Lower LTV = more cushion against price drops. 30-40% is the conservative range.
-              </div>
-            </div>
-
-            <div className="strat-control">
-              <div className="strat-control-header">
-                <label>BTC growth assumption (CAGR)</label>
-                <span className="strat-control-value-orange">{cagrPct > 0 ? "+" : ""}{cagrPct}%/yr</span>
-              </div>
-              <input
-                className="slider"
-                type="range"
-                min={-10} max={60} step={1}
-                value={cagrPct}
-                onChange={(e) => setCagrPct(parseInt(e.target.value))}
-              />
-            </div>
-
-            <div className="strat-control">
-              <div className="strat-control-header">
-                <label>Time horizon</label>
-                <span className="strat-control-value-orange">{horizonYears} {horizonYears === 1 ? "year" : "years"}</span>
-              </div>
-              <input
-                className="slider"
-                type="range"
-                min={1} max={40} step={1}
-                value={horizonYears}
-                onChange={(e) => setHorizonYears(parseInt(e.target.value))}
-              />
-              <div className="strat-control-help">
-                10 years shows compounding. 30+ years shows generational wealth.
-              </div>
-            </div>
-
-            <div className="strat-control">
-              <div className="strat-control-header">
-                <label>Lender</label>
-                <span className="strat-control-meta sb-grade-pill" style={{ color: grade.color, borderColor: grade.color }}>
-                  S&B-grade: {grade.grade}
-                </span>
-              </div>
-              <select
-                className="strat-select"
-                value={selectedLenderId}
-                onChange={(e) => setSelectedLenderId(e.target.value)}
-              >
-                {LENDERS.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name} — {(l.rateTiers?.[0]?.aprPct ?? 10).toFixed(1)}% APR
-                  </option>
-                ))}
-              </select>
-              <div className="strat-control-help">{grade.note}</div>
-            </div>
-
-            <div className="strat-control">
-              <div className="strat-control-header">
-                <label>Tax jurisdiction</label>
-              </div>
-              <select
-                className="strat-select"
-                value={jurisdiction}
-                onChange={(e) => setJurisdiction(e.target.value)}
-              >
-                {Object.entries(TAX_JURISDICTIONS).map(([code, j]) => (
-                  <option key={code} value={code}>
-                    {j.label} — {j.capitalGainsPct}% CGT {j.hasStepUpBasis ? "(step-up)" : "(no step-up)"}
-                  </option>
-                ))}
-              </select>
-              <div className="strat-control-help">{tax.note}</div>
-            </div>
-          </div>
-        </section>
-
-        <section className="strat-section">
-          <div className="strat-section-eyebrow">The Outcome</div>
-          <h2 className="strat-h2">After {horizonYears} {horizonYears === 1 ? "year" : "years"}, this strategy would have...</h2>
-
-          <div className="strat-results-grid">
-            <div className="strat-result-card strat-result-hero">
-              <div className="strat-result-label">Sats sold</div>
-              <div className="strat-result-value-hero">0</div>
-              <div className="strat-result-sub">Every sat you started with — still yours.</div>
-            </div>
-
-            <div className="strat-result-card">
-              <div className="strat-result-label">Cash extracted</div>
-              <div className="strat-result-value">${fmtNum(simulation.totalExtracted)}</div>
-              <div className="strat-result-sub">Across {horizonYears} years of living</div>
-            </div>
-
-            <div className="strat-result-card">
-              <div className="strat-result-label">Final stack value</div>
-              <div className="strat-result-value">${fmtNum(final.totalStackValueUsd)}</div>
-              <div className="strat-result-sub">At ${fmtNum(final.priceUsd)}/BTC</div>
-            </div>
-
-            <div className="strat-result-card">
-              <div className="strat-result-label">Outstanding debt</div>
-              <div className="strat-result-value">${fmtNum(final.outstandingDebt)}</div>
-              <div className="strat-result-sub">Owed to lender</div>
-            </div>
-
-            <div className={`strat-result-card ${final.netWorthUsd >= 0 ? "good" : "bad"}`}>
-              <div className="strat-result-label">Net worth</div>
-              <div className="strat-result-value">${fmtNum(final.netWorthUsd)}</div>
-              <div className="strat-result-sub">Stack value − debt</div>
-            </div>
-
-            <div className="strat-result-card">
-              <div className="strat-result-label">Interest paid</div>
-              <div className="strat-result-value">${fmtNum(simulation.totalInterestPaid + simulation.totalOriginationPaid)}</div>
-              <div className="strat-result-sub">Over {horizonYears} {horizonYears === 1 ? "year" : "years"}</div>
-            </div>
-          </div>
-
-          {simulation.strategyFailed && (
-            <div className="strat-failure">
-              <strong>⚠ Strategy failed in year {simulation.liquidationYear}.</strong> Your bridge depleted and collateral was insufficient.
-              Try lower annual income, lower LTV target, higher CAGR assumption, or a larger initial stack.
-            </div>
-          )}
-
-          {!simulation.strategyFailed && simulation.bridgeRunOutYear && (
-            <div className="strat-warning">
-              <strong>⚠ Bridge depleted in year {simulation.bridgeRunOutYear}.</strong> Strategy still works, but you've lost your insurance policy.
-            </div>
-          )}
-        </section>
-
-        <section className="strat-section">
-          <div className="strat-section-eyebrow">Visualized</div>
-          <h2 className="strat-h2">Your wealth over time</h2>
-          <p className="strat-p">
-            The orange line is your total stack value. The green line is your net worth (stack minus debt).
-            The red dashed line is your outstanding debt. The gap between orange and red is what you really own.
-          </p>
-
-          <div className="strat-chart-wrap">
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={simulation.years} margin={{ top: 10, right: 10, left: -10, bottom: 20 }}>
-                <XAxis
-                  dataKey="year"
-                  tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11, fontFamily: "Geist Mono" }}
-                  tickLine={false}
-                  axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-                />
-                <YAxis
-                  tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10, fontFamily: "Geist Mono" }}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(v) => {
-                    if (Math.abs(v) >= 1e9) return `${(v/1e9).toFixed(1)}B`;
-                    if (Math.abs(v) >= 1e6) return `${(v/1e6).toFixed(1)}M`;
-                    if (Math.abs(v) >= 1e3) return `${(v/1e3).toFixed(0)}k`;
-                    return v;
-                  }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "#0f0f10",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    borderRadius: 12,
-                    fontFamily: "Geist Mono",
-                    fontSize: 11,
-                  }}
-                  labelStyle={{ color: "rgba(255,255,255,0.6)" }}
-                  formatter={(v, name) => {
-                    const labels = {
-                      totalStackValueUsd: "Stack value",
-                      outstandingDebt: "Debt",
-                      netWorthUsd: "Net worth",
-                    };
-                    return [`$${fmtNum(v)}`, labels[name] || name];
-                  }}
-                  labelFormatter={(y) => `Year ${y}`}
-                />
-                <ReferenceLine y={0} stroke="rgba(255,255,255,0.15)" strokeDasharray="2 2" />
-                <Line type="monotone" dataKey="totalStackValueUsd" stroke="#f7931a" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="netWorthUsd" stroke="#6ee7b7" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="outstandingDebt" stroke="#fca5a5" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="strat-chart-legend">
-            <div className="legend-item"><div className="legend-line" style={{ background: "#f7931a" }} /><span>Stack value</span></div>
-            <div className="legend-item"><div className="legend-line" style={{ background: "#6ee7b7" }} /><span>Net worth</span></div>
-            <div className="legend-item"><div style={{ borderTop: "1.5px dashed #fca5a5", width: 12 }} /><span>Debt owed</span></div>
-          </div>
-        </section>
-
-        <section className="strat-section">
-          <div className="strat-section-eyebrow">Living On It</div>
-          <h2 className="strat-h2">Your monthly self-paycheck</h2>
-          <p className="strat-p">
-            You take one loan a year. The lump sum sits in a sinking fund. You pay <em>yourself</em> monthly — like a salary you control.
-          </p>
-
-          <div className="strat-paycheck">
-            <div className="strat-paycheck-row">
-              <div className="strat-paycheck-cell">
-                <div className="strat-paycheck-label">Annual loan</div>
-                <div className="strat-paycheck-value">${fmtNum(annualIncomeUsd)}</div>
-              </div>
-              <div className="strat-paycheck-divider">÷ 12</div>
-              <div className="strat-paycheck-cell">
-                <div className="strat-paycheck-label">Monthly self-paycheck</div>
-                <div className="strat-paycheck-value-large">${fmtNum(annualIncomeUsd / 12)}</div>
-              </div>
-            </div>
-            <div className="strat-paycheck-note">
-              The discipline of treating loan proceeds as a salary you pay yourself —
-              not "free money" — is what separates the people for whom this works from those for whom it doesn't.
-            </div>
-          </div>
-        </section>
-
-        <section className="strat-section">
-          <div className="strat-section-eyebrow">Lender Compatibility</div>
-          <h2 className="strat-h2">S&B-Grade: which lenders can sustain this</h2>
-          <p className="strat-p">
-            Not every lender is equally suited for a multi-year strategy. S&B-Grade evaluates each one against
-            the requirements of long-term refinancing: rollover reliability, refinance friction, and structural compatibility.
-          </p>
-
-          <div className="strat-grade-table">
-            {LENDERS.map((l) => {
-              const g = SB_GRADES[l.id] || { grade: "?", color: "#94a3b8", note: "" };
-              return (
-                <div key={l.id} className="strat-grade-row">
-                  <div className="strat-grade-name">{l.name}</div>
-                  <div className="strat-grade-badge" style={{ color: g.color, borderColor: g.color }}>
-                    {g.grade}
-                  </div>
-                  <div className="strat-grade-note">{g.note}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          <p className="strat-p strat-p-note">
-            <strong>Why no A grades?</strong> The ideal Stack & Borrow lender would offer indefinite open-ended terms
-            with guaranteed rollover at competitive rates — no current lender does this. Until one emerges, all multi-year strategies require active management and trust in your lender's continued operation.
-          </p>
-        </section>
-
-        <section className="strat-section">
-          <div className="strat-section-eyebrow">Jurisdiction Matters</div>
-          <h2 className="strat-h2">Your country shapes the math</h2>
-          <p className="strat-p">
-            The strategy's most-cited benefit — passing bitcoin to heirs at stepped-up cost basis,
-            zeroing capital gains tax — is <strong>not universal</strong>. Run the comparison:
-          </p>
-
-          <div className="strat-jurisdiction-grid">
-            {Object.entries(TAX_JURISDICTIONS).map(([code, j]) => (
-              <div
-                key={code}
-                className={`strat-juri-card ${jurisdiction === code ? "active" : ""}`}
-                onClick={() => setJurisdiction(code)}
-              >
-                <div className="strat-juri-name">{j.label}</div>
-                <div className="strat-juri-cgt">{j.capitalGainsPct}% CGT</div>
-                <div className={`strat-juri-stepup ${j.hasStepUpBasis ? "yes" : "no"}`}>
-                  {j.hasStepUpBasis ? "✓ Step-up basis" : "✗ No step-up basis"}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="strat-p strat-p-note">
-            <strong>{tax.label}:</strong> {tax.note}
-          </p>
-        </section>
-
-        <section className="strat-section">
-          <div className="strat-section-eyebrow">What Could Go Wrong</div>
-          <h2 className="strat-h2">Risks of this strategy</h2>
-          <p className="strat-p">
-            Every strategy has failure modes. This one has three big ones. Toggle below to re-run the simulation under each.
-          </p>
-
-          <div className="strat-risk-tabs">
-            <button onClick={() => setShowRiskMode("normal")} className={`strat-risk-tab ${showRiskMode === "normal" ? "active" : ""}`}>
-              Normal
-            </button>
-            <button onClick={() => setShowRiskMode("bear")} className={`strat-risk-tab ${showRiskMode === "bear" ? "active" : ""}`}>
-              Bear market
-            </button>
-            <button onClick={() => setShowRiskMode("lenderfail")} className={`strat-risk-tab ${showRiskMode === "lenderfail" ? "active" : ""}`}>
-              Lender failure
-            </button>
-          </div>
-
-          {showRiskMode === "normal" && (
-            <div className="strat-risk-content">
-              <p>Standard assumptions. Bitcoin appreciates at your CAGR estimate. Lender remains solvent. You refinance on schedule.</p>
-            </div>
-          )}
-          {showRiskMode === "bear" && (
-            <div className="strat-risk-content">
-              <p><strong>Simulated:</strong> A 3-year bear market starts at year {Math.floor(horizonYears / 3)}, with BTC dropping 30% per year.</p>
-              <p>If your collateral drops below the lender's liquidation threshold, you have three options: post more bitcoin (bridge stack), pay down loan principal, or accept liquidation.</p>
-              <p><strong>The cold storage stack is untouched no matter what.</strong></p>
-            </div>
-          )}
-          {showRiskMode === "lenderfail" && (
-            <div className="strat-risk-content">
-              <p><strong>Simulated:</strong> Your lender becomes insolvent at year {Math.floor(horizonYears * 0.65)}. Collateral held by them is lost.</p>
-              <p>BlockFi, Celsius, Genesis — all gone in 2022-2023. Lender risk is real. The only mitigation is the structure of this strategy itself: <strong>your cold storage and bridge remain in your custody.</strong></p>
-              <p>This is why allocation matters. A 70/15/15 split survives lender failure; a 0/0/100 split is wiped out.</p>
-            </div>
-          )}
-        </section>
-
-        <section className="strat-section">
-          <a href="#" className="strat-final-cta">
-            <div>
-              <div className="strat-final-cta-eyebrow">Ready to run actual numbers?</div>
-              <div className="strat-final-cta-title">Try a specific loan in the calculator →</div>
-            </div>
-          </a>
-        </section>
-
-        <div className="strat-purge-wrap">
-          <button onClick={purgeAll} className="strat-purge-btn">
-            Purge all saved data
-          </button>
-          <div className="strat-purge-note">
-            All your inputs are stored only in your browser. This button removes them and starts fresh.
-          </div>
+        {/* THE ONLY INPUT */}
+        <div className="strat-input-card">
+          <label className="strat-input-label">Extract per year</label>
+          <NumInput
+            value={annualDrawCurrency}
+            onChange={(v) => setAnnualDrawCurrency(Math.round(v))}
+            suffix={currency === "SAT" ? "sats" : currency}
+          />
         </div>
 
-        <div className="footer" style={{ marginTop: "3rem" }}>
-          <div className="footer-row">
-            <a href="#" className="footer-strategy-link">← Back to calculator</a>
-            {" · "}
-            <a href="#about" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "underline" }}>About</a>
-          </div>
-          <div className="footer-tiny" style={{ marginTop: "0.5rem" }}>
-            Strategy simulations are illustrative. Outcomes depend on assumptions that may not hold.
-            Bitcoin can fall. Lenders can fail. Tax laws change. Not financial advice.
-          </div>
+        {/* CHART — uneven curve over 30 years */}
+        <div className="strat-chart">
+          <NetWorthCurve points={sim.points} markers={markers} currency={currency} fmtCur={fmtCur} />
         </div>
+
+        {/* BIG NUMBERS at year markers */}
+        <div className="strat-markers">
+          {markers.map((m, i) => (
+            <div key={m.year} className={`strat-marker strat-marker-${i}`}>
+              <div className="strat-marker-year">Year {m.year}</div>
+              <div className="strat-marker-value">{fmtCur(m.netWorth)}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* MONTHLY PAYOUTS — compact hint with check */}
+        <details className="strat-hint">
+          <summary>Monthly payouts?</summary>
+          <div className="strat-check">
+            <div className="strat-check-corner-tl">PAY TO THE ORDER OF</div>
+            <div className="strat-check-payee">Yourself</div>
+            <div className="strat-check-amount-line">
+              <span className="strat-check-amount-label">amount</span>
+              <span className="strat-check-amount">{monthlyDrawDisplay}</span>
+            </div>
+            <div className="strat-check-memo">
+              memo: <em>discipline</em>
+            </div>
+          </div>
+          <div className="strat-hint-text">
+            One loan a year. Pay yourself monthly. The only thing between you and a self-paycheck is discipline.
+          </div>
+        </details>
+
+        {/* WHAT COULD GO WRONG — short, witty */}
+        <div className="strat-risk">
+          <h2 className="brand-h2">What could <span className="accent">possibly</span> go wrong?</h2>
+          <ul className="strat-risk-list">
+            <li><strong>Bitcoin drops hard.</strong> Collateral shrinks. You post more or get liquidated.</li>
+            <li><strong>Your lender folds.</strong> Celsius, BlockFi, Genesis — all gone in a year. Pick carefully.</li>
+            <li><strong>Rates climb.</strong> Refinancing gets expensive. Your monthly paycheck shrinks.</li>
+            <li><strong>You spend the lump sum in three months.</strong> The hardest one.</li>
+          </ul>
+        </div>
+
+        {/* GREEN CTA back to calculator */}
+        <a href="#" className="strat-cta-back">Sell vs Borrow</a>
+
+        {/* PURGE */}
+        <div className="strat-purge-row">
+          <button onClick={purgeAll} className="strat-purge">PURGE</button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: "44rem", margin: "0 auto", padding: "0 1rem" }}>
+        <BrandFooter />
       </div>
     </div>
   );
 }
 
-function StackAllocator({ coldPct, bridgePct, collateralPct, onChange }) {
+// Net worth curve — uses simulation points, highlights year markers
+function NetWorthCurve({ points, markers, currency, fmtCur }) {
+  const maxValue = Math.max(...points.map(p => Math.max(p.stackValueUsd, Math.abs(p.netWorthUsd))));
+  const minValue = Math.min(...points.map(p => p.netWorthUsd), 0);
+
   return (
-    <div className="strat-alloc">
-      <div className="strat-alloc-bar">
-        <div className="strat-alloc-segment" style={{ width: `${coldPct}%`, background: "#f7931a" }}>
-          {coldPct > 12 && <span>{coldPct}%</span>}
-        </div>
-        <div className="strat-alloc-segment" style={{ width: `${bridgePct}%`, background: "#22d3ee" }}>
-          {bridgePct > 12 && <span>{bridgePct}%</span>}
-        </div>
-        <div className="strat-alloc-segment" style={{ width: `${collateralPct}%`, background: "#94a3b8" }}>
-          {collateralPct > 12 && <span>{collateralPct}%</span>}
-        </div>
-      </div>
-
-      <div className="strat-alloc-controls">
-        <div className="strat-alloc-control">
-          <div className="strat-alloc-label">
-            <span style={{ color: "#f7931a" }}>● Cold storage</span>
-            <span className="mono">{coldPct}%</span>
-          </div>
-          <input
-            className="slider"
-            type="range" min={0} max={100} step={1}
-            value={coldPct}
-            onChange={(e) => {
-              const newCold = parseInt(e.target.value);
-              const remaining = 100 - newCold;
-              const newBridge = Math.min(bridgePct, remaining);
-              onChange(newCold, newBridge);
+    <div className="strat-chart-inner">
+      <ResponsiveContainer width="100%" height={280}>
+        <LineChart data={points} margin={{ top: 20, right: 10, left: -20, bottom: 8 }}>
+          <XAxis
+            dataKey="year"
+            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10, fontFamily: "Geist Mono" }}
+            tickLine={false}
+            axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+            ticks={[0, 2, 5, 10, 20, 30]}
+          />
+          <YAxis
+            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 9, fontFamily: "Geist Mono" }}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(v) => {
+              if (Math.abs(v) >= 1e9) return `${(v/1e9).toFixed(0)}B`;
+              if (Math.abs(v) >= 1e6) return `${(v/1e6).toFixed(0)}M`;
+              if (Math.abs(v) >= 1e3) return `${(v/1e3).toFixed(0)}k`;
+              return v;
             }}
           />
-        </div>
-        <div className="strat-alloc-control">
-          <div className="strat-alloc-label">
-            <span style={{ color: "#22d3ee" }}>● Bridge</span>
-            <span className="mono">{bridgePct}%</span>
-          </div>
-          <input
-            className="slider"
-            type="range" min={0} max={Math.max(0, 100 - coldPct)} step={1}
-            value={Math.min(bridgePct, 100 - coldPct)}
-            onChange={(e) => {
-              const newBridge = parseInt(e.target.value);
-              onChange(coldPct, newBridge);
-            }}
-          />
-        </div>
-        <div className="strat-alloc-control">
-          <div className="strat-alloc-label">
-            <span style={{ color: "#94a3b8" }}>● Working collateral</span>
-            <span className="mono">{collateralPct}%</span>
-          </div>
-          <div className="strat-alloc-derived">Derived: 100% − cold − bridge</div>
-        </div>
-      </div>
+          <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" strokeDasharray="2 2" />
+          <Line type="monotone" dataKey="stackValueUsd" stroke="#f7931a" strokeWidth={2.5} strokeOpacity={0.5} dot={false} />
+          <Line type="monotone" dataKey="netWorthUsd" stroke="#6ee7b7" strokeWidth={3} dot={false} />
+          <Line type="monotone" dataKey="outstandingDebt" stroke="rgba(252, 165, 165, 0.6)" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 }
 
-const STRATEGY_STYLES = `
+const STRAT_STYLES = `
   .strat-wrap {
-    max-width: 44rem;
+    max-width: 28rem;
     margin: 0 auto;
-    padding: 2rem 1.25rem 4rem;
+    padding: 1.5rem 1rem 4rem;
   }
 
-  .strat-back {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    color: rgba(255,255,255,0.6);
-    text-decoration: none;
-    font-size: 0.8125rem;
-    margin-bottom: 2rem;
-    transition: color 150ms;
-  }
-  .strat-back:hover { color: #f7931a; }
-
-  .strat-header { margin-bottom: 3rem; }
-  .strat-eyebrow {
-    font-size: 0.6875rem; text-transform: uppercase;
-    letter-spacing: 0.2em; color: #f7931a;
-    font-weight: 600; margin-bottom: 0.75rem;
-  }
-  .strat-title {
+  .strat-intro { margin-bottom: 1.75rem; }
+  .strat-intro .brand-h1 { margin-bottom: 0.625rem; }
+  .strat-lede {
     font-family: 'Fraunces', Georgia, serif;
-    font-size: 3rem;
-    line-height: 1.05;
-    letter-spacing: -0.025em;
-    font-weight: 600;
-    color: #fff;
-    margin: 0 0 1.25rem;
-  }
-  .strat-subtitle {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.125rem;
-    font-weight: 400;
+    font-size: 1rem;
     font-style: italic;
     color: rgba(255,255,255,0.7);
     line-height: 1.5;
     margin: 0;
   }
 
-  .strat-section { margin-bottom: 3.5rem; }
-  .strat-section-eyebrow {
-    font-size: 0.625rem; text-transform: uppercase;
-    letter-spacing: 0.2em; color: rgba(247, 147, 26, 0.7);
-    font-weight: 600; margin-bottom: 0.625rem;
-  }
-  .strat-h2 {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.625rem;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-    color: #fff;
-    line-height: 1.2;
-    margin: 0 0 1rem;
-  }
-  .strat-p {
-    font-size: 0.9375rem;
-    color: rgba(255,255,255,0.78);
-    line-height: 1.7;
-    margin: 0 0 1.125rem;
-  }
-  .strat-p strong { color: #fff; font-weight: 600; }
-  .strat-p em { color: #f7931a; font-style: normal; font-weight: 500; }
-  .strat-p-note {
-    font-size: 0.8125rem;
+  .strat-input-card {
     padding: 1rem 1.125rem;
-    border-radius: 0.75rem;
-    background: rgba(247, 147, 26, 0.05);
-    border-left: 2px solid rgba(247, 147, 26, 0.5);
-    color: rgba(255,255,255,0.75);
-    margin-top: 1.5rem;
-  }
-
-  .strat-stack-viz {
-    margin: 1.5rem 0;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    background: #141417;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .strat-alloc-bar {
-    display: flex;
-    height: 3rem;
-    border-radius: 0.625rem;
-    overflow: hidden;
-    margin-bottom: 1.25rem;
-  }
-  .strat-alloc-segment {
-    display: flex; align-items: center; justify-content: center;
-    color: rgba(0,0,0,0.8);
-    font-family: 'Geist Mono', monospace;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    transition: width 200ms ease-out;
-  }
-  .strat-alloc-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .strat-alloc-control { width: 100%; }
-  .strat-alloc-label {
-    display: flex; justify-content: space-between;
-    font-size: 0.8125rem; margin-bottom: 0.5rem;
-  }
-  .strat-alloc-label .mono {
-    font-family: 'Geist Mono', monospace;
-    color: rgba(255,255,255,0.85);
-    font-weight: 600;
-  }
-  .strat-alloc-derived {
-    font-size: 0.6875rem;
-    color: rgba(255,255,255,0.4);
-    font-style: italic;
-  }
-
-  .strat-stack-explainer {
-    margin-top: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .strat-role {
-    display: flex; gap: 0.875rem;
-    align-items: flex-start;
-  }
-  .strat-role-dot {
-    width: 0.875rem; height: 0.875rem;
-    border-radius: 50%;
-    margin-top: 0.375rem;
-    flex-shrink: 0;
-  }
-  .strat-role-title {
-    font-weight: 600;
-    color: #fff;
-    font-size: 0.9375rem;
-    margin-bottom: 0.25rem;
-  }
-  .strat-role-text {
-    font-size: 0.8125rem;
-    color: rgba(255,255,255,0.7);
-    line-height: 1.55;
-  }
-
-  .strat-controls {
-    display: flex; flex-direction: column;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    background: #141417;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .strat-control { width: 100%; }
-  .strat-control-header {
-    display: flex; justify-content: space-between;
-    align-items: baseline; margin-bottom: 0.5rem;
-  }
-  .strat-control-header label {
-    font-size: 0.875rem;
-    color: rgba(255,255,255,0.85);
-    font-weight: 500;
-  }
-  .strat-control-value-orange {
-    font-family: 'Geist Mono', monospace;
-    font-size: 1rem;
-    color: #f7931a;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-  .strat-control-meta {
-    font-family: 'Geist Mono', monospace;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.55);
-  }
-  .strat-control-help {
-    font-size: 0.6875rem;
-    color: rgba(255,255,255,0.5);
-    line-height: 1.5;
-    margin-top: 0.625rem;
-  }
-  .strat-select {
-    width: 100%;
-    padding: 0.625rem 0.75rem;
-    border-radius: 0.625rem;
-    background: #0a0a0b;
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    font-family: 'Geist', system-ui, sans-serif;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: border-color 150ms;
-  }
-  .strat-select:focus {
-    outline: none;
-    border-color: rgba(247, 147, 26, 0.6);
-  }
-
-  .sb-grade-pill {
-    display: inline-block;
-    padding: 0.125rem 0.5rem;
-    border-radius: 9999px;
-    border: 1px solid;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    background: transparent;
-  }
-
-  .strat-results-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-  .strat-result-card {
-    padding: 1.125rem;
     border-radius: 0.875rem;
     background: #141417;
     border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 1.5rem;
   }
-  .strat-result-card.strat-result-hero {
-    grid-column: 1 / -1;
-    background: linear-gradient(135deg, rgba(247, 147, 26, 0.1), transparent);
-    border-color: rgba(247, 147, 26, 0.4);
-  }
-  .strat-result-card.good {
-    border-color: rgba(110, 231, 183, 0.4);
-    background: rgba(110, 231, 183, 0.04);
-  }
-  .strat-result-card.bad {
-    border-color: rgba(252, 165, 165, 0.4);
-    background: rgba(252, 165, 165, 0.04);
-  }
-  .strat-result-label {
-    font-size: 0.625rem;
+  .strat-input-label {
+    display: block;
+    font-size: 0.6875rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     color: rgba(255,255,255,0.5);
     margin-bottom: 0.5rem;
   }
-  .strat-result-value {
-    font-family: 'Geist Mono', monospace;
-    font-size: 1.0625rem;
-    font-weight: 600;
-    color: #fff;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-  }
-  .strat-result-value-hero {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 3.5rem;
-    font-weight: 600;
-    color: #f7931a;
-    line-height: 1;
-    margin: 0.25rem 0 0.5rem;
-  }
-  .strat-result-sub {
-    font-size: 0.6875rem;
-    color: rgba(255,255,255,0.5);
-    margin-top: 0.25rem;
-    font-family: 'Geist Mono', monospace;
-  }
 
-  .strat-warning, .strat-failure {
-    padding: 1rem 1.25rem;
-    border-radius: 0.875rem;
-    margin-top: 1rem;
-    font-size: 0.875rem;
-    line-height: 1.55;
-  }
-  .strat-warning {
-    background: rgba(251, 191, 36, 0.08);
-    border: 1px solid rgba(251, 191, 36, 0.4);
-    color: #fde68a;
-  }
-  .strat-failure {
-    background: rgba(252, 165, 165, 0.08);
-    border: 1px solid rgba(252, 165, 165, 0.5);
-    color: #fecaca;
-  }
-
-  .strat-chart-wrap {
-    padding: 1.25rem 0.5rem 0.5rem;
-    border-radius: 1rem;
-    background: #141417;
-    border: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 0.75rem;
-  }
-  .strat-chart-legend {
-    display: flex; flex-wrap: wrap;
-    gap: 1rem; font-size: 0.6875rem;
-    padding-left: 0.5rem;
-  }
-
-  .strat-paycheck {
-    padding: 1.5rem;
-    border-radius: 1rem;
-    background: linear-gradient(135deg, rgba(247, 147, 26, 0.04), transparent);
-    border: 1px solid rgba(247, 147, 26, 0.2);
-  }
-  .strat-paycheck-row {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
+  .strat-chart {
     margin-bottom: 1rem;
   }
-  .strat-paycheck-cell { flex: 1; }
-  .strat-paycheck-label {
-    font-size: 0.6875rem;
+  .strat-chart-inner {
+    padding-top: 0.5rem;
+  }
+
+  .strat-markers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.625rem;
+    margin-bottom: 2.25rem;
+    align-items: end;
+  }
+  .strat-marker {
+    text-align: center;
+  }
+  .strat-marker-year {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.625rem;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 0.375rem;
   }
-  .strat-paycheck-value {
-    font-family: 'Geist Mono', monospace;
-    font-size: 1rem;
+  .strat-marker-value {
+    font-family: 'Fraunces', Georgia, serif;
     font-weight: 600;
-    color: rgba(255,255,255,0.85);
+    color: #fff;
+    line-height: 1.05;
+  }
+  /* Make later markers proportionally larger for visual impact */
+  .strat-marker-0 .strat-marker-value { font-size: 0.875rem; }
+  .strat-marker-1 .strat-marker-value { font-size: 1.0625rem; color: #6ee7b7; }
+  .strat-marker-2 .strat-marker-value { font-size: 1.375rem; color: #6ee7b7; }
+  .strat-marker-3 .strat-marker-value { font-size: 1.75rem; color: #6ee7b7; }
+
+  /* Hint disclosure with check */
+  .strat-hint {
+    background: transparent;
+    border: 1px dashed rgba(255,255,255,0.12);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 2rem;
+  }
+  .strat-hint summary {
+    cursor: pointer;
+    font-size: 0.8125rem;
+    color: rgba(255,255,255,0.7);
+    list-style: none;
+    user-select: none;
+  }
+  .strat-hint summary::-webkit-details-marker { display: none; }
+  .strat-hint summary::before {
+    content: '＋ ';
+    color: #f7931a;
+    margin-right: 0.25rem;
+  }
+  .strat-hint[open] summary::before {
+    content: '− ';
+  }
+
+  /* Half-realistic check graphic */
+  .strat-check {
+    margin: 1rem 0 0.75rem;
+    padding: 1rem 1.125rem;
+    background: linear-gradient(180deg, #f7f3e8, #ebe5d4);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 0.375rem;
+    color: #2a2a28;
+    font-family: 'Fraunces', Georgia, serif;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    transform: rotate(-1.2deg);
+  }
+  .strat-check-corner-tl {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.5rem;
+    color: rgba(0,0,0,0.5);
+    letter-spacing: 0.12em;
+    margin-bottom: 0.125rem;
+  }
+  .strat-check-payee {
+    font-size: 1.125rem;
+    font-style: italic;
+    border-bottom: 1px solid rgba(0,0,0,0.3);
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.625rem;
+  }
+  .strat-check-amount-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .strat-check-amount-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.5625rem;
+    color: rgba(0,0,0,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .strat-check-amount {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a18;
     font-variant-numeric: tabular-nums;
   }
-  .strat-paycheck-value-large {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.875rem;
-    color: #f7931a;
-    font-weight: 600;
-    line-height: 1;
-  }
-  .strat-paycheck-divider {
-    font-family: 'Geist Mono', monospace;
-    font-size: 1.125rem;
-    color: rgba(255,255,255,0.4);
-    font-weight: 500;
-  }
-  .strat-paycheck-note {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.6);
-    line-height: 1.6;
+  .strat-check-memo {
+    font-size: 0.6875rem;
+    color: rgba(0,0,0,0.55);
     font-style: italic;
   }
-
-  .strat-grade-table {
-    border-radius: 1rem;
-    background: #141417;
-    border: 1px solid rgba(255,255,255,0.1);
-    overflow: hidden;
-  }
-  .strat-grade-row {
-    display: grid;
-    grid-template-columns: 100px 60px 1fr;
-    gap: 0.875rem;
-    padding: 0.875rem 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    align-items: center;
-  }
-  .strat-grade-row:last-child { border-bottom: none; }
-  .strat-grade-name {
-    font-weight: 600;
-    color: #fff;
-    font-size: 0.875rem;
-  }
-  .strat-grade-badge {
-    text-align: center;
-    padding: 0.25rem 0;
-    border-radius: 0.5rem;
-    border: 1px solid;
-    font-family: 'Geist Mono', monospace;
-    font-size: 0.8125rem;
-    font-weight: 700;
-  }
-  .strat-grade-note {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.65);
-    line-height: 1.5;
-  }
-
-  .strat-jurisdiction-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.625rem;
-    margin: 1.25rem 0 1.5rem;
-  }
-  .strat-juri-card {
-    padding: 0.875rem;
-    border-radius: 0.75rem;
-    background: #141417;
-    border: 1px solid rgba(255,255,255,0.1);
-    cursor: pointer;
-    transition: all 150ms;
-  }
-  .strat-juri-card:hover {
-    border-color: rgba(255,255,255,0.25);
-  }
-  .strat-juri-card.active {
-    border-color: rgba(247, 147, 26, 0.5);
-    background: rgba(247, 147, 26, 0.05);
-  }
-  .strat-juri-name {
-    font-size: 0.8125rem;
-    color: #fff;
-    font-weight: 600;
-    margin-bottom: 0.375rem;
-  }
-  .strat-juri-cgt {
-    font-family: 'Geist Mono', monospace;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 0.375rem;
-  }
-  .strat-juri-stepup {
-    font-size: 0.6875rem;
+  .strat-check-memo em {
+    color: #c9740d;
     font-weight: 500;
+    font-style: italic;
   }
-  .strat-juri-stepup.yes { color: #6ee7b7; }
-  .strat-juri-stepup.no { color: rgba(252, 165, 165, 0.8); }
-
-  .strat-risk-tabs {
-    display: flex; gap: 0.375rem;
-    margin: 1rem 0;
-    padding: 0.25rem;
-    background: #0a0a0b;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 0.625rem;
-  }
-  .strat-risk-tab {
-    flex: 1;
-    padding: 0.5rem 0;
-    border: none;
-    background: transparent;
+  .strat-hint-text {
+    font-size: 0.75rem;
     color: rgba(255,255,255,0.6);
-    font-family: inherit;
-    font-size: 0.75rem;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    transition: all 150ms;
+    line-height: 1.55;
+    font-style: italic;
+    padding: 0 0.25rem;
   }
-  .strat-risk-tab:hover { color: #fff; }
-  .strat-risk-tab.active {
-    background: rgba(247, 147, 26, 0.15);
-    color: #f7931a;
-    font-weight: 600;
+
+  /* Risk section — compact, glimt-i-ögat */
+  .strat-risk {
+    margin: 2rem 0;
   }
-  .strat-risk-content {
-    padding: 1rem 1.25rem;
-    border-radius: 0.875rem;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
+  .strat-risk .brand-h2 { margin-top: 0; }
+  .strat-risk-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
   }
-  .strat-risk-content p {
+  .strat-risk-list li {
     font-size: 0.8125rem;
-    color: rgba(255,255,255,0.75);
-    line-height: 1.6;
-    margin: 0 0 0.75rem;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.7);
+    padding-left: 0.75rem;
+    border-left: 2px solid rgba(247,147,26,0.4);
   }
-  .strat-risk-content p:last-child { margin-bottom: 0; }
-  .strat-risk-content strong { color: #fff; }
-
-  .strat-final-cta {
-    display: block;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    background: linear-gradient(135deg, rgba(247, 147, 26, 0.15), rgba(247, 147, 26, 0.03));
-    border: 1px solid rgba(247, 147, 26, 0.4);
-    text-decoration: none;
-    color: inherit;
-    transition: all 200ms;
-  }
-  .strat-final-cta:hover {
-    transform: translateY(-1px);
-    border-color: rgba(247, 147, 26, 0.6);
-  }
-  .strat-final-cta-eyebrow {
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: #f7931a;
-    margin-bottom: 0.375rem;
-  }
-  .strat-final-cta-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.25rem;
-    font-weight: 600;
+  .strat-risk-list li strong {
     color: #fff;
+    font-weight: 600;
   }
 
-  .strat-purge-wrap {
-    margin-top: 4rem;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255,255,255,0.08);
+  /* Green CTA back to calculator */
+  .strat-cta-back {
+    display: block;
+    margin: 2rem auto 1.5rem;
+    padding: 0.875rem 1.5rem;
+    background: rgba(110, 231, 183, 0.12);
+    border: 1px solid rgba(110, 231, 183, 0.5);
+    color: #6ee7b7;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 0.625rem;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    transition: all 200ms;
+    max-width: 16rem;
+  }
+  .strat-cta-back:hover {
+    background: rgba(110, 231, 183, 0.18);
+    border-color: rgba(110, 231, 183, 0.7);
+  }
+
+  .strat-purge-row {
+    margin-top: 2.5rem;
     text-align: center;
   }
-  .strat-purge-btn {
+  .strat-purge {
     background: transparent;
-    border: 1px solid rgba(252, 165, 165, 0.3);
-    color: rgba(252, 165, 165, 0.85);
-    padding: 0.5rem 1.25rem;
-    border-radius: 0.5rem;
-    font-family: inherit;
-    font-size: 0.75rem;
-    font-weight: 500;
+    border: 1px solid rgba(252, 165, 165, 0.25);
+    color: rgba(252, 165, 165, 0.7);
+    padding: 0.375rem 1rem;
+    border-radius: 0.375rem;
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.6875rem;
+    font-weight: 600;
     cursor: pointer;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0.15em;
     transition: all 150ms;
   }
-  .strat-purge-btn:hover {
-    background: rgba(252, 165, 165, 0.1);
-    border-color: rgba(252, 165, 165, 0.6);
-  }
-  .strat-purge-note {
-    font-size: 0.6875rem;
-    color: rgba(255,255,255,0.4);
-    margin-top: 0.75rem;
-    line-height: 1.5;
+  .strat-purge:hover {
+    background: rgba(252, 165, 165, 0.08);
+    border-color: rgba(252, 165, 165, 0.5);
+    color: rgba(252, 165, 165, 0.95);
   }
 `;
