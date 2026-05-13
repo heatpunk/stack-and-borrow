@@ -29,6 +29,11 @@ import {
 } from '../system/components.jsx';
 import { usePersistentState } from '../lib/hooks.js';
 import {
+  VoidStateLoading,
+  VoidStateLoanTooSmall,
+  VoidStateNoRegion,
+} from './Void.jsx';
+import {
   computeInterest,
   projectBtcPrice,
   computeLiquidationPrice,
@@ -131,11 +136,35 @@ export default function CalculatorPage({
   // Format helpers bound to current currency
   const fmt = (usd) => fmtMoney(usd, currency, CURRENCY_META, btcSpotUsd);
 
+  // ===== VOID STATES =====
+  // First-paint loading splash: live prices haven't resolved yet.
+  if (live.loading && live.source === 'fallback') {
+    return <VoidStateLoading source="mempool.space" />;
+  }
+  // Loan below the global $1,000 floor — no lender will quote.
+  if (loanUsd > 0 && loanUsd < 1000) {
+    return (
+      <VoidStateLoanTooSmall
+        amountLabel={fmt(loanUsd)}
+        minLabel="$1,000"
+      />
+    );
+  }
+  // Region not served by any lender (and lender data is loaded).
+  if (lenders.length > 0 && ranked.length === 0 && region !== 'global') {
+    return (
+      <VoidStateNoRegion
+        regionLabel={regionLabelFor(region)}
+        regionCode={region}
+      />
+    );
+  }
+
   return (
     <PaperFrame>
       <BrandHeader
-        currentPage="I"
-        pageOf="III"
+        currentPage="II"
+        pageOf="IV"
         rightSlot={
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
             <LivePriceBadge btcUsd={live.btcUsd} loading={live.loading} error={live.error} onRefresh={live.refresh} />
@@ -574,3 +603,13 @@ const pickerBtn = {
   color: SB.ink,
   cursor: 'pointer',
 };
+
+// Friendly label for a region code (used in NoRegion void state).
+function regionLabelFor(code) {
+  const map = {
+    us: 'the US', ca: 'Canada', eu: 'the EU', uk: 'the UK',
+    au: 'Australia', jp: 'Japan', ch: 'Switzerland',
+    global: 'your region',
+  };
+  return map[code] || 'your region';
+}
