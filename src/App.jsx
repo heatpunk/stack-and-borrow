@@ -116,7 +116,14 @@ export default function App() {
   //   anything else             → 404
   let page;
   if (route === '' || route === '#') {
-    page = <LandingPage live={live} />;
+    page = (
+      <LandingPage
+        live={live}
+        lenders={lenders}
+        region={region}
+        initialCurrency={initialCurrency}
+      />
+    );
   } else if (route === '#calculator') {
     page = (
       <CalculatorPage
