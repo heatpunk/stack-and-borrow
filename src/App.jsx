@@ -120,19 +120,26 @@ const BRAND_STYLES = `
   .brand-header {
     max-width: 28rem;
     margin: 0 auto;
-    padding: 1.25rem 1rem 0;
+    padding: 5px 1rem 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.625rem;
   }
   .brand-header-strategy { max-width: 44rem; }
-  .brand-header-right { flex-shrink: 0; }
+  .brand-header-right {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    height: 38px;
+  }
   .brand-logo-svg { flex-shrink: 0; }
   .brand-logo-text {
     font-family: 'Fraunces', serif;
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-size: 22px;
+    font-weight: 500;
     color: #fff;
     letter-spacing: -0.01em;
     line-height: 1;
@@ -195,21 +202,28 @@ const BRAND_STYLES = `
   .brand-footer-meta { color: rgba(255,255,255,0.35); }
   .brand-footer-disclaimer { color: rgba(255,255,255,0.3); margin-top: 0.5rem; }
 
-  /* Discreet live BTC price (no border/box, under currency picker) */
+  /* Discreet live BTC price (no border/box) */
   .live-price-discreet {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     justify-content: center;
     margin-top: 0.5rem;
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
+    opacity: 0.8;
     color: rgba(255,255,255,0.5);
     font-family: 'Geist Mono', monospace;
+  }
+  .live-price-discreet--in-header {
+    justify-content: flex-end;
+    margin-top: 0;
+    margin-bottom: 0;
   }
   .live-dot {
     width: 0.375rem; height: 0.375rem;
     border-radius: 50%;
     background: #6ee7b7;
+    vertical-align: middle;
   }
   .live-dot.loading { background: #fbbf24; animation: pulse 1.5s ease-in-out infinite; }
   .live-dot.error { background: #fca5a5; }
@@ -236,17 +250,7 @@ const BRAND_STYLES = `
 `;
 
 const STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500,0..100,1;9..144,600,0..100,1;9..144,700,0..100,1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
-
-  /* Global Fraunces tuning: WONK on, slight SOFT for character */
-  [class*="logo-text"],
-  [class*="brand-h1"],
-  [class*="brand-h2"],
-  [class*="headline-keep"],
-  [class*="headline-amount"],
-  .display {
-    font-variation-settings: "SOFT" 50, "WONK" 1;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; }
 
@@ -266,7 +270,7 @@ const STYLES = `
   .card {
     border-radius: 1rem;
     border: 1px solid rgba(255,255,255,0.1);
-    background: #141417;
+    background: rgba(20, 20, 23, 1);
   }
 
   /* HEADER */
@@ -316,40 +320,55 @@ const STYLES = `
   }
   .input-stack { display: flex; flex-direction: column; gap: 1.25rem; }
   .input-row { width: 100%; }
-  .input-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+  .input-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 32px;
+    padding-top: 8px;
+    margin-bottom: 0;
+  }
   .input-label { font-size: 0.875rem; color: rgba(255,255,255,0.8); }
   .input-label-large {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #fff;
-    letter-spacing: -0.005em;
+    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 2px;
     display: block;
-    margin-bottom: 0.5rem;
+    width: 416px;
+    max-width: 100%;
+    margin: 0;
+    padding-right: 24px;
   }
   .input-meta { font-family: 'Geist Mono', monospace; font-size: 0.6875rem; color: rgba(255,255,255,0.55); }
   .input-value-orange { font-family: 'Geist Mono', monospace; font-size: 1rem; color: #f7931a; font-weight: 600; font-variant-numeric: tabular-nums; }
 
   .num-input {
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.625rem 0.75rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 10px 0.75rem 0.625rem 0.75rem;
     border-radius: 0.75rem;
-    background: #0a0a0b;
-    border: 1px solid rgba(255,255,255,0.15);
+    background: linear-gradient(135deg, rgba(100, 65, 23, 0.15) 0%, rgba(0, 0, 0, 0) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: border-color 150ms;
   }
   .num-input:focus-within { border-color: rgba(247, 147, 26, 0.6); }
   .num-input input {
-    background: transparent; border: none; outline: none;
+    background: unset;
+    background-color: unset;
+    border: none; outline: none;
     width: 100%;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.9);
     font-family: 'Geist Mono', monospace;
     font-size: 0.875rem;
     font-variant-numeric: tabular-nums;
+    text-align: center;
+    vertical-align: bottom;
+    -moz-appearance: textfield;
   }
   .num-input input::-webkit-inner-spin-button,
   .num-input input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-  .num-input input { -moz-appearance: textfield; }
   .num-input-suffix { color: rgba(255,255,255,0.5); font-size: 0.75rem; }
 
   /* SLIDER */
@@ -403,7 +422,7 @@ const STYLES = `
   }
 
   /* HEADLINE */
-  .headline-card { padding: 1.5rem; position: relative; overflow: hidden; }
+  .headline-card { margin-top: 16px; padding: 1.5rem; position: relative; overflow: hidden; }
   .headline-eyebrow {
     font-size: 0.625rem;
     text-transform: uppercase;
@@ -431,7 +450,7 @@ const STYLES = `
     font-family: 'Fraunces', serif;
     font-size: 2.5rem; line-height: 1.05;
     letter-spacing: -0.015em;
-    color: #f7931a; font-weight: 600;
+    color: rgba(247, 147, 26, 1); font-weight: 600;
     margin-top: 0.25rem;
   }
   .headline-detail {
@@ -688,8 +707,9 @@ const STYLES = `
   /* CURRENCY PICKER */
   .picker-wrap { position: relative; }
   .picker-button {
-    display: flex; align-items: center; gap: 0.375rem;
-    padding: 0.375rem 0.5rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.375rem;
+    height: 21px;
+    padding: 0 0.5rem;
     border-radius: 0.375rem;
     background: transparent;
     border: none;
@@ -1018,8 +1038,9 @@ function BrandLogo() {
 }
 
 // Shared brand header — appears on every page. Logo links back to calculator.
-// On Calculator, accepts a rightSlot (currency picker).
-function BrandHeader({ wide = false, rightSlot = null }) {
+// On Calculator: optional aboveRightSlot (e.g. live BTC) stacked above rightSlot (currency).
+function BrandHeader({ wide = false, rightSlot = null, aboveRightSlot = null }) {
+  const showRight = aboveRightSlot || rightSlot;
   return (
     <div className={`brand-header ${wide ? "brand-header-strategy" : ""}`}>
       <a href="#" className="brand-logo-link">
@@ -1029,7 +1050,12 @@ function BrandHeader({ wide = false, rightSlot = null }) {
           <div className="brand-logo-tagline">Keep your sats.</div>
         </div>
       </a>
-      {rightSlot && <div className="brand-header-right">{rightSlot}</div>}
+      {showRight && (
+        <div className="brand-header-right">
+          {aboveRightSlot}
+          {rightSlot}
+        </div>
+      )}
     </div>
   );
 }
@@ -1327,21 +1353,23 @@ function Calculator() {
     <div className="bcalc">
       <style>{STYLES}</style>
       <style>{BRAND_STYLES}</style>
-      <BrandHeader rightSlot={<CurrencyPicker currency={currency} setCurrency={setCurrency} />} />
+      <BrandHeader
+        aboveRightSlot={(
+          <div className="live-price-discreet live-price-discreet--in-header anim-in" style={{ animationDelay: "30ms" }}>
+            <span className={`live-dot ${live.loading ? "loading" : live.error ? "error" : "live"}`} />
+            <span className="live-label">BTC</span>
+            <span className="live-value">{fmtFiat(BTC_SPOT_USD / live.fxToUsd[fiatCurrency], fiatCurrency)}</span>
+            <button className="live-refresh" onClick={live.refresh} title="Refresh">↻</button>
+          </div>
+        )}
+        rightSlot={<CurrencyPicker currency={currency} setCurrency={setCurrency} />}
+      />
       <div className="bcalc-wrap">
-        {/* Discreet live BTC price, centered under header */}
-        <div className="live-price-discreet anim-in" style={{ animationDelay: "30ms", marginBottom: "1.5rem" }}>
-          <span className={`live-dot ${live.loading ? "loading" : live.error ? "error" : "live"}`} />
-          <span className="live-label">BTC</span>
-          <span className="live-value">{fmtFiat(BTC_SPOT_USD / live.fxToUsd[fiatCurrency], fiatCurrency)}</span>
-          <button className="live-refresh" onClick={live.refresh} title="Refresh">↻</button>
-        </div>
-
         {/* INPUT */}
         <div className="mb-4 anim-in" style={{ animationDelay: "60ms" }}>
           <div className="input-row">
             <div className="input-header">
-              <label className="input-label-large">Extract fiat</label>
+              <label className="input-label-large">LOAN AMOUNT</label>
             </div>
             <NumInput
               value={loanInputValue}
