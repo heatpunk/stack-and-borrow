@@ -130,11 +130,11 @@ const BRAND_STYLES = `
   .brand-header-right { flex-shrink: 0; }
   .brand-logo-svg { flex-shrink: 0; }
   .brand-logo-text {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.25rem;
+    font-family: 'Fraunces', serif;
+    font-size: 1.125rem;
     font-weight: 600;
     color: #fff;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.01em;
     line-height: 1;
   }
   .brand-logo-tagline {
