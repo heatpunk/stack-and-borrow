@@ -62,21 +62,27 @@ export function resolveTier(lender, loanUsd) {
 // Rank lenders for a given loan + region. Total cost = interest + origination.
 // Optionally apply a per-region rate adjustment (some lenders charge more
 // outside their home market).
-export function rankLenders(allLenders, { loanUsd, region, ltvPct, termMonths }) {
-  return allLenders
-    .filter((l) => {
-      if (!l.country) return true;
-      if (l.country.includes('global')) return true;
-      if (region === 'us' && l.country.includes('us')) return true;
-      if (region === 'ca' && l.country.includes('ca')) return true;
-      if (region === 'eu' && l.country.includes('eu')) return true;
-      if (region === 'ch' && (l.country.includes('ch') || l.country.includes('eu'))) return true;
-      if (region === 'uk' && (l.country.includes('uk') || l.country.includes('eu'))) return true;
-      if (region === 'au' && l.country.includes('au')) return true;
-      if (region === 'jp' && l.country.includes('jp')) return true;
-      return false;
-    })
-    .filter((l) => loanUsd >= (l.minLoanUsd ?? 0) && ltvPct <= (l.maxLtv ?? 100))
+// When `eligibleOnly` is false (directory mode), every lender is scored and
+// sorted; eligibility filters are skipped so the list is not region/LTV/min-loan gated.
+export function rankLenders(allLenders, { loanUsd, region, ltvPct, termMonths, eligibleOnly = true }) {
+  let list = allLenders;
+  if (eligibleOnly) {
+    list = allLenders
+      .filter((l) => {
+        if (!l.country) return true;
+        if (l.country.includes('global')) return true;
+        if (region === 'us' && l.country.includes('us')) return true;
+        if (region === 'ca' && l.country.includes('ca')) return true;
+        if (region === 'eu' && l.country.includes('eu')) return true;
+        if (region === 'ch' && (l.country.includes('ch') || l.country.includes('eu'))) return true;
+        if (region === 'uk' && (l.country.includes('uk') || l.country.includes('eu'))) return true;
+        if (region === 'au' && l.country.includes('au')) return true;
+        if (region === 'jp' && l.country.includes('jp')) return true;
+        return false;
+      })
+      .filter((l) => loanUsd >= (l.minLoanUsd ?? 0) && ltvPct <= (l.maxLtv ?? 100));
+  }
+  return list
     .map((l) => {
       const { aprPct, originationFeePct } = resolveTier(l, loanUsd);
       const regional = l.regionalRateAdjustment

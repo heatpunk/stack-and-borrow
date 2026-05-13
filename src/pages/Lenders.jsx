@@ -1,6 +1,7 @@
 // ============================================================
-// LENDERS PAGE — full directory of all lenders from lenders.json,
-// filterable, ranked by total cost for a default loan size.
+// LENDERS PAGE — full directory of all lenders from lenders.json
+// (chip filters only). Same cost metric as the calculator for sorting, but
+// eligibility (region / min loan / max LTV) is not applied here.
 // ============================================================
 
 import React, { useState, useMemo } from 'react';
@@ -85,6 +86,7 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
       region: region || 'global',
       ltvPct: LTV_PCT,
       termMonths: TERM_MONTHS,
+      eligibleOnly: false,
     }),
     [filtered, region]
   );
