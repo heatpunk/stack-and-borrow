@@ -113,7 +113,7 @@ export function BrandHeader({ rightSlot = null, currentPage = null, pageOf = nul
               color: SB.inkMute,
               marginTop: big ? 6 : 5, fontWeight: 600,
             }}>
-              BITCOIN-BACKED LOAN · BOOKLET
+              · BITCOIN-BACKED LOANS ·
             </div>
           </div>
         </a>
@@ -558,12 +558,18 @@ export function LivePriceBadge({ btcUsd, loading, error, onRefresh }) {
         }} />
         BTC · ${btcUsd ? Math.round(btcUsd).toLocaleString('en-US') : '—'}
       </div>
-      <button onClick={onRefresh} style={{
-        background: 'transparent', border: 'none', padding: 0,
-        color: SB.inkMute, fontFamily: SB.mono, fontSize: 9,
-        letterSpacing: '0.12em', cursor: 'pointer',
-      }}>
-        {error ? 'RETRY ↻' : loading ? 'FETCHING…' : 'REFRESH ↻'}
+      <button
+        type="button"
+        onClick={onRefresh}
+        aria-label={!error && !loading ? 'Refresh live BTC price' : undefined}
+        title={!error && !loading ? 'Refresh' : undefined}
+        style={{
+          background: 'transparent', border: 'none', padding: 0,
+          color: SB.inkMute, fontFamily: SB.mono, fontSize: 9,
+          letterSpacing: '0.12em', cursor: 'pointer',
+        }}
+      >
+        {error ? 'RETRY ↻' : loading ? 'FETCHING…' : '↻'}
       </button>
     </div>
   );

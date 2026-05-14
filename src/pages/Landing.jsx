@@ -156,6 +156,7 @@ export default function LandingPage({ live, lenders = [], region, initialCurrenc
           font-variant-numeric: tabular-nums;
           width: 100%;
           min-width: 0;
+          text-align: center;
           caret-color: ${SB.orange};
         }
         .lp-amount-input::placeholder { color: ${SB.inkFaint}; }
@@ -239,40 +240,44 @@ export default function LandingPage({ live, lenders = [], region, initialCurrenc
           AMOUNT REQUESTED
         </div>
         <div style={{
-          display: 'flex', alignItems: 'baseline', gap: 4,
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8,
           marginTop: 8,
         }}>
-          {meta.position === 'pre' && (
-            <span style={{
-              fontFamily: SB.serif,
-              fontSize: 32, fontWeight: 400,
-              color: SB.inkMute,
-              flexShrink: 0,
-            }}>
-              {meta.symbol}
-            </span>
-          )}
-          <input
-            className="lp-amount-input"
-            type="text"
-            inputMode="numeric"
-            aria-label="Loan amount"
-            value={fmtNum(loanInCurrency)}
-            onChange={onAmountChange}
-            onFocus={(e) => e.target.select()}
-          />
-          {meta.position === 'post' && (
-            <span style={{
-              fontFamily: SB.mono,
-              fontSize: 16, fontWeight: 500,
-              color: SB.inkMute, marginLeft: 4,
-              flexShrink: 0,
-            }}>
-              {meta.symbol}
-            </span>
-          )}
+          <div style={{
+            flex: 1, minWidth: 0,
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4,
+          }}>
+            {meta.position === 'pre' && (
+              <span style={{
+                fontFamily: SB.serif,
+                fontSize: 32, fontWeight: 400,
+                color: SB.inkMute,
+                flexShrink: 0,
+              }}>
+                {meta.symbol}
+              </span>
+            )}
+            <input
+              className="lp-amount-input"
+              type="text"
+              inputMode="numeric"
+              aria-label="Loan amount"
+              value={fmtNum(loanInCurrency)}
+              onChange={onAmountChange}
+              onFocus={(e) => e.target.select()}
+            />
+            {meta.position === 'post' && (
+              <span style={{
+                fontFamily: SB.mono,
+                fontSize: 16, fontWeight: 500,
+                color: SB.inkMute, marginLeft: 4,
+                flexShrink: 0,
+              }}>
+                {meta.symbol}
+              </span>
+            )}
+          </div>
           <button onClick={cycleCurrency} style={{
-            marginLeft: 'auto',
             background: 'transparent',
             border: `1.5px solid ${SB.ink}`,
             padding: '4px 10px',
@@ -340,7 +345,7 @@ export default function LandingPage({ live, lenders = [], region, initialCurrenc
           label="Best APR available"
           value={aprPct.toFixed(2) + '%'}
           valueStyle={{ color: SB.orange }}
-          sub={bestLender ? `${bestLender.name} · ${TERM_MONTHS}mo` : `fallback · ${TERM_MONTHS}mo`}
+          sub={`${TERM_MONTHS}mo`}
         />
         <Row
           label={`Interest, ${TERM_MONTHS} months`}
@@ -617,6 +622,7 @@ function DesktopLandingLayout({
           letter-spacing: -0.025em; line-height: 1;
           font-variant-numeric: tabular-nums;
           width: 100%; min-width: 0;
+          text-align: center;
           caret-color: ${SB.orange};
         }
         .dl-amount-input::placeholder { color: ${SB.inkFaint}; }
@@ -675,34 +681,38 @@ function DesktopLandingLayout({
           AMOUNT REQUESTED
         </div>
         <div style={{
-          display: 'flex', alignItems: 'baseline', gap: 6,
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10,
           marginTop: 10,
         }}>
-          {meta.position === 'pre' && (
-            <span style={{
-              fontFamily: SB.serif,
-              fontSize: 40, fontWeight: 400,
-              color: SB.inkMute, flexShrink: 0,
-            }}>{meta.symbol}</span>
-          )}
-          <input
-            className="dl-amount-input"
-            type="text"
-            inputMode="numeric"
-            aria-label="Loan amount"
-            value={fmtNum(loanInCurrency)}
-            onChange={onAmountChange}
-            onFocus={(e) => e.target.select()}
-          />
-          {meta.position === 'post' && (
-            <span style={{
-              fontFamily: SB.mono,
-              fontSize: 18, fontWeight: 500,
-              color: SB.inkMute, marginLeft: 4, flexShrink: 0,
-            }}>{meta.symbol}</span>
-          )}
+          <div style={{
+            flex: 1, minWidth: 0,
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 6,
+          }}>
+            {meta.position === 'pre' && (
+              <span style={{
+                fontFamily: SB.serif,
+                fontSize: 40, fontWeight: 400,
+                color: SB.inkMute, flexShrink: 0,
+              }}>{meta.symbol}</span>
+            )}
+            <input
+              className="dl-amount-input"
+              type="text"
+              inputMode="numeric"
+              aria-label="Loan amount"
+              value={fmtNum(loanInCurrency)}
+              onChange={onAmountChange}
+              onFocus={(e) => e.target.select()}
+            />
+            {meta.position === 'post' && (
+              <span style={{
+                fontFamily: SB.mono,
+                fontSize: 18, fontWeight: 500,
+                color: SB.inkMute, marginLeft: 4, flexShrink: 0,
+              }}>{meta.symbol}</span>
+            )}
+          </div>
           <button onClick={cycleCurrency} style={{
-            marginLeft: 'auto',
             background: 'transparent',
             border: `1.5px solid ${SB.ink}`,
             padding: '6px 12px',
@@ -760,7 +770,7 @@ function DesktopLandingLayout({
         <Row label="Best APR available"
           value={aprPct.toFixed(2) + '%'}
           valueStyle={{ color: SB.orange }}
-          sub={bestLender ? `${bestLender.name} · ${TERM_MONTHS}mo` : `fallback · ${TERM_MONTHS}mo`} />
+          sub={`${TERM_MONTHS}mo`} />
         <Row label={`Interest, ${TERM_MONTHS} months`}
           value={fmtMoney(interestUsd, currency, CURRENCY_META, btcSpotUsd)}
           sub="paid at maturity" />
@@ -975,8 +985,10 @@ function DesktopLandingLayout({
         textAlign: 'center', marginTop: 10,
         fontFamily: SB.mono, fontSize: 10,
         letterSpacing: '0.16em', color: SB.inkMute,
+        display: 'flex', flexDirection: 'column', gap: 4,
       }}>
-        you'll leave the booklet · we never see your details
+        <span>· you&apos;ll leave Stack &amp; Borrow ·</span>
+        <span>not your details</span>
       </div>
     </div>
   );

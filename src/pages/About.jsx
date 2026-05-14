@@ -43,7 +43,7 @@ const PRINCIPLES = [
   {
     no: 'V',
     title: 'Honest about the risks.',
-    body: 'BTC has dropped >50% from a 12-month high six times since 2013. Borrowing at 50% LTV means a 50% drawdown is your liquidation event. Six times in twelve years is not "if" — it is "when."',
+    body: 'BTC has dropped >50% from a 12-month high six times since 2013. Borrowing at 50% LTV means a 50% drawdown is your liquidation event. Six times in twelve years is not if but when.',
   },
 ];
 
@@ -163,7 +163,7 @@ export default function AboutPage() {
         }}>
           <li>You'd be devastated by a 50% BTC drawdown (which has happened six times)</li>
           <li>You don't understand rehypothecation and which lenders practice it</li>
-          <li>You're borrowing to <i>buy more bitcoin</i>. That's leverage — not strategy.</li>
+          <li>You're borrowing to <i>buy more bitcoin</i>. That's leverage, not strategy.</li>
         </ul>
       </div>
 
@@ -347,7 +347,7 @@ function DesktopAboutLayout() {
         }}>
           <li>You'd be devastated by a 50% BTC drawdown (which has happened six times)</li>
           <li>You don't understand rehypothecation and which lenders practice it</li>
-          <li>You're borrowing to <i>buy more bitcoin</i>. That's leverage — not strategy.</li>
+          <li>You're borrowing to <i>buy more bitcoin</i>. That's leverage, not strategy.</li>
         </ul>
       </div>
 

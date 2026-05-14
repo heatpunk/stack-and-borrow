@@ -154,7 +154,7 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
           fontFamily: SB.serif, fontSize: 30, fontWeight: 600,
           lineHeight: 1.05, letterSpacing: '-0.025em', color: SB.ink,
         }}>
-          {lenders.length} lenders.<br />
+          Many lenders.<br />
           <span style={{ color: SB.orange, fontStyle: 'italic', fontWeight: 500 }}>One ranking metric.</span>
         </h1>
         <p style={{
@@ -171,6 +171,7 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
       <div style={{
         display: 'flex', gap: 6, flexWrap: 'wrap',
         margin: '14px 0 4px',
+        justifyContent: 'center',
       }}>
         {FILTERS.map((f) => (
           <Chip key={f.id} active={filter === f.id} onClick={() => setFilter(f.id)}>
@@ -181,6 +182,7 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
       <div style={{
         fontFamily: SB.mono, fontSize: 9.5,
         color: SB.inkMute, marginTop: 8, letterSpacing: '0.02em',
+        textAlign: 'center',
       }}>
         Quote sized for <b style={{ color: SB.ink }}>{fmtMoney(QUOTE_LOAN_USD, currency, CURRENCY_META, live.btcUsd)} · 12mo · 50% LTV</b>.
       </div>
@@ -378,7 +380,7 @@ function DesktopLendersLayout({
         fontFamily: SB.serif, fontSize: 56, fontWeight: 600,
         lineHeight: 1, letterSpacing: '-0.03em', color: SB.ink,
       }}>
-        {lenders.length} lenders.<br />
+        Many lenders.<br />
         <span style={{ color: SB.orange, fontStyle: 'italic', fontWeight: 500 }}>
           One ranking metric.
         </span>
@@ -394,7 +396,10 @@ function DesktopLendersLayout({
 
       <DashedRule label="FILTER" />
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{
+        display: 'flex', gap: 8, flexWrap: 'wrap',
+        justifyContent: 'center',
+      }}>
         {FILTERS.map((f) => (
           <Chip key={f.id} active={filter === f.id} onClick={() => setFilter(f.id)}>
             {f.label} · {counts[f.id] ?? 0}
@@ -404,6 +409,7 @@ function DesktopLendersLayout({
       <div style={{
         fontFamily: SB.mono, fontSize: 11,
         color: SB.inkMute, marginTop: 12, letterSpacing: '0.02em',
+        textAlign: 'center',
       }}>
         Quote sized for <b style={{ color: SB.ink }}>
           {fmtMoney(quoteLoanUsd, currency, CURRENCY_META, live.btcUsd)} · 12mo · 50% LTV
@@ -430,6 +436,7 @@ function DesktopLendersLayout({
         margin: 0,
         fontFamily: SB.sans, fontSize: 12.5, lineHeight: 1.6,
         color: SB.inkSoft, textWrap: 'pretty',
+        textAlign: 'center',
       }}>
         Rates verified quarterly. Tiered lenders (Strike, Ledn, Arch)
         resolve to the band that covers your loan size. When two

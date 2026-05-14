@@ -234,41 +234,52 @@ export default function CalculatorPage({
         padding: '14px 14px 14px',
         background: SB.orangeWash,
         border: `1.5px dashed ${SB.orangeSoft}`,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 18,
       }}>
         <div style={{
           fontFamily: SB.mono, fontSize: 9, letterSpacing: '0.22em',
           color: SB.orange, fontWeight: 700,
         }}>PRINCIPAL · BORROWED</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 8 }}>
-          {CURRENCY_META[currency].position === 'pre' && (
-            <span style={{ fontFamily: SB.serif, fontSize: 32, fontWeight: 400, color: SB.inkMute }}>
-              {CURRENCY_META[currency].symbol}
-            </span>
-          )}
-          <span style={{
-            fontFamily: SB.serif, fontSize: 46, fontWeight: 600,
-            color: SB.ink, letterSpacing: '-0.025em', lineHeight: 1,
-            fontVariantNumeric: 'tabular-nums',
-          }}>{fmtNum(loanInCurrency)}</span>
-          {CURRENCY_META[currency].position === 'post' && (
+        <div style={{
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8,
+        }}>
+          <div style={{
+            flex: 1, minWidth: 0,
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4,
+          }}>
+            {CURRENCY_META[currency].position === 'pre' && (
+              <span style={{ fontFamily: SB.serif, fontSize: 32, fontWeight: 400, color: SB.inkMute }}>
+                {CURRENCY_META[currency].symbol}
+              </span>
+            )}
             <span style={{
-              fontFamily: SB.mono, fontSize: 16, fontWeight: 500,
-              color: SB.inkMute, marginLeft: 4,
-            }}>{CURRENCY_META[currency].symbol}</span>
-          )}
-          <button onClick={cycleCurrency} style={{ ...pickerBtn, marginLeft: 'auto' }}>
+              fontFamily: SB.serif, fontSize: 46, fontWeight: 600,
+              color: SB.ink, letterSpacing: '-0.025em', lineHeight: 1,
+              fontVariantNumeric: 'tabular-nums',
+            }}>{fmtNum(loanInCurrency)}</span>
+            {CURRENCY_META[currency].position === 'post' && (
+              <span style={{
+                fontFamily: SB.mono, fontSize: 16, fontWeight: 500,
+                color: SB.inkMute, marginLeft: 4,
+              }}>{CURRENCY_META[currency].symbol}</span>
+            )}
+          </div>
+          <button onClick={cycleCurrency} style={{ ...pickerBtn, flexShrink: 0 }}>
             {CURRENCY_META[currency].label} ▾
           </button>
         </div>
 
         {/* Slider */}
-        <div style={{ marginTop: 14 }}>
+        <div>
           <input
             type="range"
             min={min} max={max} step={step}
             value={loanInCurrency}
             onChange={onSlide}
             className="sb-slider"
+            aria-label="Loan amount"
           />
           <div style={{
             display: 'flex', justifyContent: 'space-between',
@@ -394,7 +405,7 @@ export default function CalculatorPage({
         })}
       </div>
 
-      <SectionHead no="§ IV" title="Projection · 20 Years" subtitle="net of interest, tax & liquidations" />
+      <SectionHead no="§ IV" title="Projection" subtitle="net of interest, tax & liquidations" />
 
       <Projection
         spot={btcSpotUsd}
@@ -482,12 +493,20 @@ export default function CalculatorPage({
                   {q.isTiered && <Pill color={SB.orange}>TIERED</Pill>}
                 </div>
                 {q.notes && (
-                  <div style={{ fontFamily: SB.mono, fontSize: 9.5, color: SB.inkMute, marginTop: 3, letterSpacing: '0.02em', lineHeight: 1.45 }}>
-                    {isExpanded || !truncated ? q.notes : q.notes.slice(0, 80) + '…'}
+                  <div>
+                    <div style={{
+                      fontFamily: SB.mono, fontSize: 9.5, color: SB.inkMute, marginTop: 3,
+                      letterSpacing: '0.02em', lineHeight: 1.45,
+                    }}>
+                      {isExpanded || !truncated ? q.notes : q.notes.slice(0, 80) + '…'}
+                    </div>
                     {truncated && (
-                      <span style={{ color: SB.orange, fontWeight: 700, marginLeft: 4 }}>
-                        {isExpanded ? ' show less ▴' : ' show more ▾'}
-                      </span>
+                      <div style={{
+                        fontFamily: SB.mono, fontSize: 9.5, fontWeight: 700, color: SB.orange,
+                        marginTop: 2, letterSpacing: '0.02em',
+                      }}>
+                        {isExpanded ? 'show less ▴' : 'show more ▾'}
+                      </div>
                     )}
                   </div>
                 )}
@@ -522,8 +541,10 @@ export default function CalculatorPage({
         fontFamily: SB.mono,
         fontSize: 9, letterSpacing: '0.16em',
         color: SB.inkMute,
+        display: 'flex', flexDirection: 'column', gap: 3,
       }}>
-        you'll leave the booklet · we never see your details
+        <span>· you&apos;ll leave Stack &amp; Borrow ·</span>
+        <span>not your details</span>
       </div>
 
       <FineFooter source={live.source} updated={lastUpdated} />
@@ -732,12 +753,15 @@ function DesktopCalculatorLayout(props) {
         padding: '18px',
         background: SB.orangeWash,
         border: `1.5px dashed ${SB.orangeSoft}`,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
       }}>
         <div style={{
           fontFamily: SB.mono, fontSize: 10, letterSpacing: '0.22em',
           color: SB.orange, fontWeight: 700,
         }}>PRINCIPAL · BORROWED</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
           {meta.position === 'pre' && (
             <span style={{ fontFamily: SB.serif, fontSize: 38, fontWeight: 400, color: SB.inkMute }}>{meta.symbol}</span>
           )}
@@ -751,7 +775,7 @@ function DesktopCalculatorLayout(props) {
           )}
         </div>
 
-        <div style={{ marginTop: 18 }}>
+        <div>
           <input
             type="range"
             min={min} max={max} step={step}
@@ -883,7 +907,7 @@ function DesktopCalculatorLayout(props) {
         PAGE II · RIGHT — PROJECTION & VERDICT
       </div>
 
-      <DSectionHead no="§ IV" title="Projection · 20 years" subtitle="net of interest, tax & liquidations" />
+      <DSectionHead no="§ IV" title="Projection" subtitle="net of interest, tax & liquidations" />
 
       <Projection
         spot={btcSpotUsd}
@@ -971,12 +995,20 @@ function DesktopCalculatorLayout(props) {
                   {q.isTiered && <Pill color={SB.orange}>TIERED</Pill>}
                 </div>
                 {q.notes && (
-                  <div style={{ fontFamily: SB.mono, fontSize: 11, color: SB.inkMute, marginTop: 4, letterSpacing: '0.02em', lineHeight: 1.5 }}>
-                    {isExpanded || !truncated ? q.notes : q.notes.slice(0, 100) + '…'}
+                  <div>
+                    <div style={{
+                      fontFamily: SB.mono, fontSize: 11, color: SB.inkMute, marginTop: 4,
+                      letterSpacing: '0.02em', lineHeight: 1.5,
+                    }}>
+                      {isExpanded || !truncated ? q.notes : q.notes.slice(0, 100) + '…'}
+                    </div>
                     {truncated && (
-                      <span style={{ color: SB.orange, fontWeight: 700, marginLeft: 4 }}>
-                        {isExpanded ? ' show less ▴' : ' show more ▾'}
-                      </span>
+                      <div style={{
+                        fontFamily: SB.mono, fontSize: 11, fontWeight: 700, color: SB.orange,
+                        marginTop: 2, letterSpacing: '0.02em',
+                      }}>
+                        {isExpanded ? 'show less ▴' : 'show more ▾'}
+                      </div>
                     )}
                   </div>
                 )}
@@ -1010,8 +1042,10 @@ function DesktopCalculatorLayout(props) {
         textAlign: 'center', marginTop: 10,
         fontFamily: SB.mono, fontSize: 10,
         letterSpacing: '0.16em', color: SB.inkMute,
+        display: 'flex', flexDirection: 'column', gap: 4,
       }}>
-        you'll leave the booklet · we never see your details
+        <span>· you&apos;ll leave Stack &amp; Borrow ·</span>
+        <span>not your details</span>
       </div>
     </div>
   );
