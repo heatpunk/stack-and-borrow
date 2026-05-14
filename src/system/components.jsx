@@ -294,13 +294,22 @@ export function SectionHead({ no, title, subtitle }) {
 // lender lists. The dots fill the space between label and value.
 // ------------------------------------------------------------
 export function Row({ label, value, sub, valueStyle = {}, labelStyle = {} }) {
+  // Two-row grid: label+dots and value share the baseline row; sub
+  // drops onto its own row spanning the full width, right-aligned.
+  // The value column auto-sizes to the value text only, so the
+  // dotted leader extends right up to that text regardless of how
+  // wide the sub line happens to be.
   return (
     <div style={{
-      display: 'flex', alignItems: 'baseline', gap: 4,
+      display: 'grid',
+      gridTemplateColumns: 'minmax(0, 1fr) auto',
+      columnGap: 4,
+      alignItems: 'baseline',
       padding: '6px 0',
     }}>
       <div style={{
-        flex: 1, minWidth: 0,
+        gridColumn: 1, gridRow: 1,
+        minWidth: 0,
         fontSize: 11.5,
         color: SB.inkSoft,
         display: 'flex', alignItems: 'baseline', gap: 4,
@@ -312,25 +321,29 @@ export function Row({ label, value, sub, valueStyle = {}, labelStyle = {} }) {
           flex: 1, overflow: 'hidden', whiteSpace: 'nowrap',
           color: SB.inkFaint, letterSpacing: '0.08em',
         }}>
-          ................................................................................
+          {'.'.repeat(300)}
         </span>
       </div>
-      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+      <div style={{
+        gridColumn: 2, gridRow: 1,
+        fontFamily: SB.mono,
+        fontSize: 12, fontWeight: 600,
+        color: SB.ink,
+        whiteSpace: 'nowrap',
+        textAlign: 'right',
+        ...valueStyle,
+      }}>{value}</div>
+      {sub && (
         <div style={{
+          gridColumn: '1 / span 2', gridRow: 2,
+          justifySelf: 'end',
           fontFamily: SB.mono,
-          fontSize: 12, fontWeight: 600,
-          color: SB.ink,
-          ...valueStyle,
-        }}>{value}</div>
-        {sub && (
-          <div style={{
-            fontFamily: SB.mono,
-            fontSize: 9,
-            color: SB.inkMute,
-            marginTop: 1, letterSpacing: '0.02em',
-          }}>{sub}</div>
-        )}
-      </div>
+          fontSize: 9,
+          color: SB.inkMute,
+          marginTop: 1, letterSpacing: '0.02em',
+          whiteSpace: 'nowrap',
+        }}>{sub}</div>
+      )}
     </div>
   );
 }
