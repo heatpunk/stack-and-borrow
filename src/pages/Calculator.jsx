@@ -243,14 +243,14 @@ export default function CalculatorPage({
           color: SB.orange, fontWeight: 700,
         }}>PRINCIPAL · BORROWED</div>
         <div style={{
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
         }}>
           <div style={{
             flex: 1, minWidth: 0,
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
           }}>
             {CURRENCY_META[currency].position === 'pre' && (
-              <span style={{ fontFamily: SB.serif, fontSize: 32, fontWeight: 400, color: SB.inkMute }}>
+              <span style={{ fontFamily: SB.serif, fontSize: 32, fontWeight: 400, color: SB.inkMute, lineHeight: 1 }}>
                 {CURRENCY_META[currency].symbol}
               </span>
             )}
@@ -761,9 +761,9 @@ function DesktopCalculatorLayout(props) {
           fontFamily: SB.mono, fontSize: 10, letterSpacing: '0.22em',
           color: SB.orange, fontWeight: 700,
         }}>PRINCIPAL · BORROWED</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {meta.position === 'pre' && (
-            <span style={{ fontFamily: SB.serif, fontSize: 38, fontWeight: 400, color: SB.inkMute }}>{meta.symbol}</span>
+            <span style={{ fontFamily: SB.serif, fontSize: 38, fontWeight: 400, color: SB.inkMute, lineHeight: 1 }}>{meta.symbol}</span>
           )}
           <span style={{
             fontFamily: SB.serif, fontSize: 60, fontWeight: 600,
