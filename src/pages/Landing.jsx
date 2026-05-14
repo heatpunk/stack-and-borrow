@@ -240,18 +240,19 @@ export default function LandingPage({ live, lenders = [], region, initialCurrenc
           AMOUNT REQUESTED
         </div>
         <div style={{
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
           marginTop: 8,
         }}>
           <div style={{
             flex: 1, minWidth: 0,
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
           }}>
             {meta.position === 'pre' && (
               <span style={{
                 fontFamily: SB.serif,
                 fontSize: 32, fontWeight: 400,
                 color: SB.inkMute,
+                lineHeight: 1,
                 flexShrink: 0,
               }}>
                 {meta.symbol}
@@ -681,18 +682,18 @@ function DesktopLandingLayout({
           AMOUNT REQUESTED
         </div>
         <div style={{
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
           marginTop: 10,
         }}>
           <div style={{
             flex: 1, minWidth: 0,
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 6,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           }}>
             {meta.position === 'pre' && (
               <span style={{
                 fontFamily: SB.serif,
                 fontSize: 40, fontWeight: 400,
-                color: SB.inkMute, flexShrink: 0,
+                color: SB.inkMute, lineHeight: 1, flexShrink: 0,
               }}>{meta.symbol}</span>
             )}
             <input
