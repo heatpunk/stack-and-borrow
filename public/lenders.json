@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-12",
+  "lastUpdated": "2026-05-14",
   "lenders": [
     {
       "id": "ledn",
@@ -86,17 +86,17 @@
       "minLoanUsd": 10000,
       "maxLtv": 75,
       "rateTiers": [
-        { "maxLoanUsd": null, "aprPct": 10.0 }
+        { "maxLoanUsd": null, "aprPct": 8.91 }
       ],
-      "originationFeePct": 0,
+      "originationFeePct": 1,
       "feeWaivedFor": [],
       "custody": "Custodial. Highest LTV in market.",
       "custodyType": "custodial",
       "rehypothecation": "yes",
-      "term": "Variable",
+      "term": "12-month interest-only",
       "rollover": "Yes",
       "repayment": "Interest-only payments during loan, principal due at maturity. Repayment in USD via bank account. No prepayment penalty. Liquidation buffer between 75% and 80% LTV.",
-      "notes": "75% LTV is the most aggressive available — capital-efficient but high liquidation risk. Rehypothecates collateral, which subsidizes the rate but increases counterparty risk.",
+      "notes": "Rate quoted at 50% LTV (8.91% / 9.999% APR with 1% origination fee). Figure prices by LTV, not by loan size — rates rise to ~11.50% at 75% LTV. Up to 75% LTV is the most aggressive available but carries high liquidation risk. Rehypothecates collateral, which subsidizes the rate but increases counterparty risk.",
       "badge": "Highest LTV",
       "referralUrl": "https://figure.com"
     },
@@ -105,20 +105,20 @@
       "name": "Milo",
       "country": ["us"],
       "excluded": [],
-      "minLoanUsd": 75000,
+      "minLoanUsd": 5000,
       "maxLtv": 50,
       "rateTiers": [
-        { "maxLoanUsd": null, "aprPct": 10.75 }
+        { "maxLoanUsd": null, "aprPct": 8.75 }
       ],
-      "originationFeePct": 0,
+      "originationFeePct": 2,
       "feeWaivedFor": [],
       "custody": "Coinbase / BitGo. No rehypothecation.",
       "custodyType": "custodial",
       "rehypothecation": "no",
-      "term": "Interest-only with balloon. Deferred-payment option available.",
+      "term": "1 year, plus extensions",
       "rollover": "Yes, subject to approval",
       "repayment": "Standard: monthly interest payments, principal balloon at maturity. Deferred option: no monthly payments — interest accrues and is paid in full at maturity along with principal. Higher-touch service for larger loans.",
-      "notes": "Larger ticket loans ($75K–$5M). Strong custody at Coinbase Custody. Deferred-payment option is rare and useful if you need to avoid monthly outflow.",
+      "notes": "BTC and ETH collateral. Loans from $5K up to $5M. Starting rate 8.75% (10.75% APR with 2% origination fee). Margin call at 67% LTV. Custody at Coinbase/BitGo with no rehypothecation. Deferred-payment option is rare and useful if you need to avoid monthly outflow.",
       "badge": "Big-ticket",
       "referralUrl": "https://milo.io"
     },
