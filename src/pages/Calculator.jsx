@@ -741,23 +741,25 @@ function MaturitySection({
   const btcKeptAfterLiq = Math.max(0, collateralBtc - btcToCoverDebt);
   const satsKeptAfterLiq = Math.max(0, collateralSats - satsToCoverDebt);
 
-  // ROLL OVER row varies by lender's rolloverEase. Each variant describes
-  // what literally happens at maturity — friction level shown by tone.
+  // ROLL OVER row varies by lender's rolloverEase. Each variant leads
+  // with the variant name (matching the § V pill) so the reader can tell
+  // the three flavors apart at a glance. Sub explains the practical
+  // consequence. Friction level shown by tone.
   const ease = lender.rolloverEase;
   let rollPrimary, rollSub, rollRightSub, rollTone;
   if (ease === 'revolving') {
-    rollPrimary = <>Repay and re-draw <InfoIcon def={GLOSSARY.revolving} /></>;
-    rollSub = `${lender.rollover} — no fixed maturity; interest accrues only on the outstanding balance.`;
-    rollRightSub = 'STACK KEPT';
+    rollPrimary = <>Revolving — line stays open <InfoIcon def={GLOSSARY.revolving} /></>;
+    rollSub = 'No maturity to roll past. Interest accrues only on the outstanding balance — you decide when to close the line.';
+    rollRightSub = 'NO ACTION';
     rollTone = SB.forest;
   } else if (ease === 'approval') {
-    rollPrimary = <>Refinance at maturity <InfoIcon def={GLOSSARY.refinance} /></>;
-    rollSub = `${lender.rollover} — lender re-underwrites; a fresh origination fee may apply and a new APR locks in for another 12 months.`;
+    rollPrimary = <>Refinance — extends for another term <InfoIcon def={GLOSSARY.refinance} /></>;
+    rollSub = 'Lender re-underwrites; a fresh origination fee may apply and a new APR locks in for another 12 months.';
     rollRightSub = 'IF APPROVED';
     rollTone = SB.inkSoft;
   } else {
-    rollPrimary = <>Sign a new loan agreement <InfoIcon def={GLOSSARY.rollover} /></>;
-    rollSub = `${lender.rollover} — you re-apply from scratch at the lender's then-current rates and terms.`;
+    rollPrimary = <>New loan — apply from scratch <InfoIcon def={GLOSSARY.newContract} /></>;
+    rollSub = 'You re-apply at the lender’s then-current rates and terms. Collateral is released between loans, then re-locked.';
     rollRightSub = 'IF APPROVED';
     rollTone = SB.inkSoft;
   }

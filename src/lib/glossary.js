@@ -71,6 +71,10 @@ export const GLOSSARY = {
     title: 'Rollover',
     body: 'The umbrella term for not paying off at maturity. Three flavors: revolving (no maturity to roll past), refinance (a fresh loan replaces the old one), or a new contract (you apply again from scratch). Which one your lender offers determines how much friction is involved.',
   },
+  newContract: {
+    title: 'New loan at maturity',
+    body: 'Some lenders don’t offer refinance — at maturity you must fully repay, then apply for a new loan from scratch if you want to keep borrowing. Treated as a brand-new transaction: fresh credit check, fresh origination fee, fresh APR. More friction than refinance, but your collateral is still released and returned to you between loans.',
+  },
   refinance: {
     title: 'Refinance',
     body: 'Replacing your existing loan with a new one at maturity. The lender re-underwrites you, a new APR locks in, and a new origination fee may apply. Your collateral isn’t touched — it just stays put under the new loan. Distinct from a revolving line, which has no maturity to refinance against.',
@@ -97,6 +101,7 @@ export const GLOSSARY_ORDER = [
   'liquidation',
   'ltv',
   'multisig',
+  'newContract',
   'origination',
   'principal',
   'refinance',
