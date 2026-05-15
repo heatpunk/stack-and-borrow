@@ -66,7 +66,12 @@ function badgeFor(l) {
 
 // Custody label for the terms grid.
 function custodyShort(l) {
-  if (l.custodyType === 'multisig')  return 'MULTISIG';
+  if (l.custodyType === 'multisig') {
+    if (l.custodyKind === 'taproot-vault')   return 'TAPROOT';
+    if (l.custodyKind === 'dlc')             return 'DLC';
+    if (l.custodyKind === 'collab-multisig') return 'COLLAB MSIG';
+    return 'MULTISIG';
+  }
   if (l.custodyType === 'segregated') return 'SEGREGATED';
   if (l.custodyType === 'custodial')  return 'CUSTODIAL';
   if (l.custodyType === 'custodial-mixed') return 'MIXED';
@@ -337,7 +342,7 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
         <Row label="Rehypothecation" value="lender lends out your collateral"
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 11.5 }}
           sub="higher rate, higher risk" />
-        <Row label="Multisig custody" value="keys split 2-of-3"
+        <Row label="Multisig custody" value="script-enforced, no unilateral lender control"
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 11.5 }}
           sub="strongest model" />
         <Row label="Origination fee" value="paid upfront, not APR"
@@ -442,7 +447,7 @@ function DesktopLendersLayout({
         <Row label="Rehypothecation" value="lender lends out your collateral"
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 12 }}
           sub="higher rate, higher risk" />
-        <Row label="Multisig custody" value="keys split 2-of-3"
+        <Row label="Multisig custody" value="script-enforced, no unilateral lender control"
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 12 }}
           sub="strongest model" />
         <Row label="Origination fee" value="paid upfront, not APR"

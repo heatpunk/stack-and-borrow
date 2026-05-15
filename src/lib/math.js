@@ -64,6 +64,9 @@ export function resolveTier(lender, loanUsd) {
 // Baseline (0pp) = multisig + no rehyp + BTC-only. Reflects counterparty risk
 // that isn't priced into the nominal APR. See methodology in Lenders.jsx.
 export function custodyRiskPremiumPct(lender) {
+  // All multisig sub-kinds (taproot-vault / dlc / collab-multisig) share 0pp
+  // by design — the premium prices rehyp/pooled-custody failure modes, not
+  // crypto-design maturity. See METHOD in Lenders.jsx.
   const base = { multisig: 0.0, 'custodial-mixed': 0.5, custodial: 1.0 };
   const rehypSurcharge = { no: 0.0, optional: 1.5, yes: 3.0 };
   const altcoinSurcharge = lender.btcOnly === true ? 0.0 : 0.5;
