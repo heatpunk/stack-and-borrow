@@ -26,8 +26,10 @@ import {
   FineFooter,
   LivePriceBadge,
   SunMoonStamp,
+  InfoIcon,
   ensureSliderCss,
 } from '../system/components.jsx';
+import { GLOSSARY } from '../lib/glossary.js';
 import { useIsDesktop } from '../system/theme.jsx';
 import { DesktopSpreadFrame, DSectionHead } from '../system/desktop.jsx';
 import { usePersistentState } from '../lib/hooks.js';
@@ -297,16 +299,18 @@ export default function CalculatorPage({
       <SectionHead no="§ II" title="Collateral & Terms" />
 
       <div style={{ padding: '0 2px' }}>
-        <Row label="Collateral required" value={collateralBtc.toFixed(5) + ' BTC'} sub={fmtNum(collateralSats) + ' sats'} />
-        <Row label="Loan-to-value (fixed)" value="50%" />
-        <Row label="Term length" value="12 months" sub="balloon at maturity" />
+        <Row label="Collateral required" value={collateralBtc.toFixed(5) + ' BTC'} sub={fmtNum(collateralSats) + ' sats'} info={GLOSSARY.collateral} />
+        <Row label="Loan-to-value (fixed)" value="50%" info={GLOSSARY.ltv} />
+        <Row label="Term length" value="12 months" sub="balloon at maturity" info={GLOSSARY.balloon} />
         <Row label="Liquidation price"
              value={'$' + fmtNum(liqUsd)}
              valueStyle={{ color: SB.rust }}
-             sub={Math.abs(liqDropPct).toFixed(1) + '% drop from spot'} />
+             sub={Math.abs(liqDropPct).toFixed(1) + '% drop from spot'}
+             info={GLOSSARY.liquidation} />
         <Row label="Sats lost if liquidated"
              value={'−' + fmtNum(collateralSats * (LIQ_LTV_PCT / 100))}
-             valueStyle={{ color: SB.rust }} />
+             valueStyle={{ color: SB.rust }}
+             info={GLOSSARY.sats} />
       </div>
 
       {/* Liquidation alert */}
@@ -473,6 +477,7 @@ export default function CalculatorPage({
           const rn = ['I', 'II', 'III', 'IV'][i];
           const isExpanded = expandedQuoteId === q.id;
           const truncated = q.notes && q.notes.length > 80;
+          const rp = rolloverPillSpec(q.rolloverEase);
           return (
             <div
               key={q.id}
@@ -491,6 +496,7 @@ export default function CalculatorPage({
                   <span style={{ fontFamily: SB.serif, fontSize: 16, fontWeight: 600, color: SB.ink, letterSpacing: '-0.005em' }}>{q.name}</span>
                   <Pill color={i === 0 ? SB.forest : SB.ink} filled={i === 0}>{q.badge || '—'}</Pill>
                   {q.isTiered && <Pill color={SB.orange}>TIERED</Pill>}
+                  {rp && <Pill color={rp.color}>{rp.label}</Pill>}
                 </div>
                 {q.notes && (
                   <div>
@@ -534,7 +540,7 @@ export default function CalculatorPage({
       </div>
 
       <Button href={bestLender?.referralUrl || '#lenders'}>
-        {bestLender ? `OPEN WITH ${bestLender.name.toUpperCase()} — BEST RATE` : 'BROWSE ALL LENDERS'}
+        {bestLender ? `OPEN WITH ${bestLender.name.toUpperCase()}` : 'BROWSE ALL LENDERS'}
       </Button>
       <div style={{
         textAlign: 'center', marginTop: 8,
@@ -546,6 +552,17 @@ export default function CalculatorPage({
         <span>· you&apos;ll leave Stack &amp; Borrow ·</span>
         <span>not your details</span>
       </div>
+
+      <MaturitySection
+        lender={bestLender}
+        principalUsd={loanUsd}
+        interestUsd={interestUsd}
+        totalOwedUsd={totalOwedUsd}
+        collateralBtc={collateralBtc}
+        collateralSats={collateralSats}
+        btcSpotUsd={btcSpotUsd}
+        fmt={fmt}
+      />
 
       <FineFooter source={live.source} updated={lastUpdated} />
       <PageNav active="calc" />
@@ -690,6 +707,198 @@ const pickerBtn = {
   cursor: 'pointer',
 };
 
+// Map rolloverEase → pill metadata for § V Best Quotes.
+// `revolving` = open credit line; `approval` = lender supports refinance
+// but requires re-underwriting; `new-contract` = must apply from scratch.
+// Only revolving gets a tinted pill (forest) — it's the standout case.
+// The other two share inkMute so neither feels flagged as “bad” — they
+// just signal “there's friction at maturity, see § VI”.
+function rolloverPillSpec(ease) {
+  if (ease === 'revolving')    return { color: SB.forest,  label: '↻ REVOLVING' };
+  if (ease === 'approval')     return { color: SB.inkMute, label: '↻ REFINANCE' };
+  if (ease === 'new-contract') return { color: SB.inkMute, label: '↻ NEW LOAN' };
+  return null;
+}
+
+// ============================================================
+// MaturitySection — § VI · what happens 12 months from now.
+// Same numbers the rest of the page works with, projected forward
+// to the maturity date. Three outcomes side-by-side:
+//   I   PAY OFF     — wire fiat, reclaim full collateral.
+//   II  ROLL OVER   — extend/refinance; stack untouched if approved.
+//   III LIQUIDATE   — lender sells enough BTC to cover debt; rest returned.
+// Collapsed by default — power-user disclosure under the CTA.
+// ============================================================
+function MaturitySection({
+  lender, principalUsd, interestUsd, totalOwedUsd,
+  collateralBtc, collateralSats, btcSpotUsd, fmt,
+}) {
+  const [open, setOpen] = useState(false);
+  if (!lender) return null;
+
+  const btcToCoverDebt = totalOwedUsd / btcSpotUsd;
+  const satsToCoverDebt = Math.round(btcToCoverDebt * SATS_PER_BTC);
+  const btcKeptAfterLiq = Math.max(0, collateralBtc - btcToCoverDebt);
+  const satsKeptAfterLiq = Math.max(0, collateralSats - satsToCoverDebt);
+
+  // ROLL OVER row varies by lender's rolloverEase. Each variant describes
+  // what literally happens at maturity — friction level shown by tone.
+  const ease = lender.rolloverEase;
+  let rollPrimary, rollSub, rollRightSub, rollTone;
+  if (ease === 'revolving') {
+    rollPrimary = <>Repay and re-draw <InfoIcon def={GLOSSARY.revolving} /></>;
+    rollSub = `${lender.rollover} — no fixed maturity; interest accrues only on the outstanding balance.`;
+    rollRightSub = 'STACK KEPT';
+    rollTone = SB.forest;
+  } else if (ease === 'approval') {
+    rollPrimary = <>Refinance at maturity <InfoIcon def={GLOSSARY.refinance} /></>;
+    rollSub = `${lender.rollover} — lender re-underwrites; a fresh origination fee may apply and a new APR locks in for another 12 months.`;
+    rollRightSub = 'IF APPROVED';
+    rollTone = SB.inkSoft;
+  } else {
+    rollPrimary = <>Sign a new loan agreement <InfoIcon def={GLOSSARY.rollover} /></>;
+    rollSub = `${lender.rollover} — you re-apply from scratch at the lender's then-current rates and terms.`;
+    rollRightSub = 'IF APPROVED';
+    rollTone = SB.inkSoft;
+  }
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          width: '100%',
+          background: 'transparent',
+          border: `1px dashed ${SB.inkLine}`,
+          padding: '10px 14px',
+          textAlign: 'left',
+          cursor: 'pointer',
+          fontFamily: SB.mono,
+          fontSize: 10.5, fontWeight: 700,
+          letterSpacing: '0.14em',
+          color: SB.inkSoft,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 10,
+        }}
+        aria-expanded={open}
+      >
+        <span>WHAT HAPPENS AT MATURITY?</span>
+        <span style={{ color: SB.orange, letterSpacing: '0.08em' }}>
+          {open ? '▴ HIDE' : '▾ SHOW'}
+        </span>
+      </button>
+
+      {open && (
+        <>
+          <SectionHead
+            no="§ VI"
+            title="At maturity"
+            subtitle={`12 mo · with ${lender.name}`}
+          />
+          <div style={{
+            marginTop: -2, marginBottom: 8,
+            fontFamily: SB.mono, fontSize: 10, color: SB.inkSoft,
+            letterSpacing: '0.04em', lineHeight: 1.55,
+          }}>
+            Three paths — pick one based on your situation.
+          </div>
+          <MaturityOption
+            rn="I"
+            label="PAY OFF"
+            primary={fmt(totalOwedUsd)}
+            primarySub={
+              <>
+                {fmt(interestUsd)} interest + {fmt(principalUsd)} principal{' '}
+                <InfoIcon def={GLOSSARY.principal} />
+                {' · no tax event'}
+              </>
+            }
+            right={collateralBtc.toFixed(5) + ' BTC'}
+            rightSub="STACK KEPT"
+            tone={SB.forest}
+          />
+          <MaturityOption
+            rn="II"
+            label="ROLL OVER"
+            primary={rollPrimary}
+            primarySub={rollSub}
+            right={collateralBtc.toFixed(5) + ' BTC'}
+            rightSub={rollRightSub}
+            tone={rollTone}
+          />
+          <MaturityOption
+            rn="III"
+            label="LET LENDER LIQUIDATE"
+            primary={btcToCoverDebt.toFixed(5) + ' BTC sold'}
+            primarySub={
+              <>
+                @ ${fmtNum(Math.round(btcSpotUsd))} to cover {fmt(totalOwedUsd)} · taxable in most jurisdictions{' '}
+                <InfoIcon def={GLOSSARY.taxEvent} />
+              </>
+            }
+            right={btcKeptAfterLiq.toFixed(5) + ' BTC'}
+            rightSub="STACK REDUCED"
+            tone={SB.rust}
+          />
+          <div style={{
+            marginTop: 10,
+            padding: '8px 2px 0',
+            fontFamily: SB.mono, fontSize: 9.5, color: SB.inkMute,
+            lineHeight: 1.5,
+            letterSpacing: '0.02em',
+          }}>
+            Numbers assume BTC at today&apos;s spot price. Rollover is subject to the lender&apos;s policy at maturity and may carry a fresh origination fee. Some lenders also charge a liquidation fee — check your terms.
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function MaturityOption({ rn, label, primary, primarySub, right, rightSub, tone, dashed }) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: '28px minmax(0, 1fr) auto',
+      alignItems: 'center', gap: 10,
+      padding: '12px 0',
+      borderBottom: `${dashed ? '1px dashed' : '1px dotted'} ${SB.inkLine}`,
+    }}>
+      <div style={{
+        fontFamily: SB.serif, fontStyle: 'italic',
+        fontSize: 15, color: tone, fontWeight: 500,
+      }}>{rn}</div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{
+          fontFamily: SB.mono, fontSize: 9.5, fontWeight: 700,
+          letterSpacing: '0.16em', color: tone, marginBottom: 4,
+        }}>{label}</div>
+        <div style={{
+          fontFamily: SB.serif, fontSize: 16, fontWeight: 600,
+          color: SB.ink, letterSpacing: '-0.005em',
+        }}>{primary}</div>
+        <div style={{
+          fontFamily: SB.mono, fontSize: 9.5, color: SB.inkMute,
+          marginTop: 3, lineHeight: 1.5,
+        }}>{primarySub}</div>
+      </div>
+      <div style={{ textAlign: 'right', minWidth: 0 }}>
+        <div style={{
+          fontFamily: SB.mono, fontSize: 13, fontWeight: 700, color: tone,
+          fontVariantNumeric: 'tabular-nums',
+          whiteSpace: 'nowrap',
+        }}>{right}</div>
+        <div style={{
+          fontFamily: SB.mono, fontSize: 8.5, color: SB.inkSoft,
+          marginTop: 3, letterSpacing: '0.14em', fontWeight: 700,
+        }}>{rightSub}</div>
+      </div>
+    </div>
+  );
+}
+
 // Friendly label for a region code (used in NoRegion void state).
 function regionLabelFor(code) {
   const map = {
@@ -744,7 +953,7 @@ function DesktopCalculatorLayout(props) {
         color: SB.inkMute, fontWeight: 700,
         marginTop: 18, marginBottom: 4,
       }}>
-        PAGE II · LEFT — INPUTS & TERMS
+        PAGE II · LEFT — INPUTS · TERMS · PROJECTION
       </div>
 
       <DSectionHead no="§ I" title="Loan amount" />
@@ -798,16 +1007,18 @@ function DesktopCalculatorLayout(props) {
       <DSectionHead no="§ II" title="Collateral & terms" />
 
       <div style={{ padding: '0 2px' }}>
-        <Row label="Collateral required" value={collateralBtc.toFixed(5) + ' BTC'} sub={fmtNum(collateralSats) + ' sats'} />
-        <Row label="Loan-to-value (fixed)" value="50%" />
-        <Row label="Term length" value="12 months" sub="balloon at maturity" />
+        <Row label="Collateral required" value={collateralBtc.toFixed(5) + ' BTC'} sub={fmtNum(collateralSats) + ' sats'} info={GLOSSARY.collateral} />
+        <Row label="Loan-to-value (fixed)" value="50%" info={GLOSSARY.ltv} />
+        <Row label="Term length" value="12 months" sub="balloon at maturity" info={GLOSSARY.balloon} />
         <Row label="Liquidation price"
              value={'$' + fmtNum(liqUsd)}
              valueStyle={{ color: SB.rust }}
-             sub={Math.abs(liqDropPct).toFixed(1) + '% drop from spot'} />
+             sub={Math.abs(liqDropPct).toFixed(1) + '% drop from spot'}
+             info={GLOSSARY.liquidation} />
         <Row label="Sats lost if liquidated"
              value={'−' + fmtNum(collateralSats * (LIQ_LTV_PCT / 100))}
-             valueStyle={{ color: SB.rust }} />
+             valueStyle={{ color: SB.rust }}
+             info={GLOSSARY.sats} />
       </div>
 
       <div style={{
@@ -894,18 +1105,6 @@ function DesktopCalculatorLayout(props) {
           );
         })}
       </div>
-    </div>
-  );
-
-  const right = (
-    <div>
-      <div style={{
-        fontFamily: SB.mono, fontSize: 10, letterSpacing: '0.24em',
-        color: SB.inkMute, fontWeight: 700,
-        marginTop: 18, marginBottom: 4,
-      }}>
-        PAGE II · RIGHT — PROJECTION & VERDICT
-      </div>
 
       <DSectionHead no="§ IV" title="Projection" subtitle="net of interest, tax & liquidations" />
 
@@ -967,6 +1166,18 @@ function DesktopCalculatorLayout(props) {
           </div>
         </div>
       </div>
+    </div>
+  );
+
+  const right = (
+    <div>
+      <div style={{
+        fontFamily: SB.mono, fontSize: 10, letterSpacing: '0.24em',
+        color: SB.inkMute, fontWeight: 700,
+        marginTop: 18, marginBottom: 4,
+      }}>
+        PAGE II · RIGHT — QUOTES & MATURITY
+      </div>
 
       <DSectionHead no="§ V" title="Best quotes" subtitle={`ranked by total cost · ${Math.min(4, ranked.length)} of ${Math.max(4, ranked.length)}`} />
 
@@ -975,6 +1186,7 @@ function DesktopCalculatorLayout(props) {
           const rn = ['I', 'II', 'III', 'IV'][i];
           const isExpanded = expandedQuoteId === q.id;
           const truncated = q.notes && q.notes.length > 100;
+          const rp = rolloverPillSpec(q.rolloverEase);
           return (
             <div
               key={q.id}
@@ -993,6 +1205,7 @@ function DesktopCalculatorLayout(props) {
                   <span style={{ fontFamily: SB.serif, fontSize: 18, fontWeight: 600, color: SB.ink, letterSpacing: '-0.005em' }}>{q.name}</span>
                   <Pill color={i === 0 ? SB.forest : SB.ink} filled={i === 0}>{q.badge || '—'}</Pill>
                   {q.isTiered && <Pill color={SB.orange}>TIERED</Pill>}
+                  {rp && <Pill color={rp.color}>{rp.label}</Pill>}
                 </div>
                 {q.notes && (
                   <div>
@@ -1036,7 +1249,7 @@ function DesktopCalculatorLayout(props) {
       </div>
 
       <Button href={bestLender?.referralUrl || '#lenders'}>
-        {bestLender ? `OPEN WITH ${bestLender.name.toUpperCase()} — BEST RATE` : 'BROWSE ALL LENDERS'}
+        {bestLender ? `OPEN WITH ${bestLender.name.toUpperCase()}` : 'BROWSE ALL LENDERS'}
       </Button>
       <div style={{
         textAlign: 'center', marginTop: 10,
@@ -1047,6 +1260,17 @@ function DesktopCalculatorLayout(props) {
         <span>· you&apos;ll leave Stack &amp; Borrow ·</span>
         <span>not your details</span>
       </div>
+
+      <MaturitySection
+        lender={bestLender}
+        principalUsd={loanUsd}
+        interestUsd={interestUsd}
+        totalOwedUsd={totalOwedUsd}
+        collateralBtc={collateralBtc}
+        collateralSats={collateralSats}
+        btcSpotUsd={btcSpotUsd}
+        fmt={fmt}
+      />
     </div>
   );
 

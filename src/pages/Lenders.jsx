@@ -342,7 +342,7 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
         <Row label="Rehypothecation" value="lender lends out your collateral"
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 11.5 }}
           sub="higher rate, higher risk" />
-        <Row label="Multisig custody" value="script-enforced, no unilateral lender control"
+        <Row label="Multisig custody" value="no single-party control"
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 11.5 }}
           sub="strongest model" />
         <Row label="Origination fee" value="paid upfront, not APR"
@@ -447,7 +447,7 @@ function DesktopLendersLayout({
         <Row label="Rehypothecation" value="lender lends out your collateral"
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 12 }}
           sub="higher rate, higher risk" />
-        <Row label="Multisig custody" value="script-enforced, no unilateral lender control"
+        <Row label="Multisig custody" value="no single-party control"
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 12 }}
           sub="strongest model" />
         <Row label="Origination fee" value="paid upfront, not APR"

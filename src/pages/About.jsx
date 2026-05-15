@@ -18,6 +18,7 @@ import {
 } from '../system/components.jsx';
 import { useIsDesktop } from '../system/theme.jsx';
 import { DesktopSpreadFrame } from '../system/desktop.jsx';
+import { GLOSSARY, GLOSSARY_ORDER } from '../lib/glossary.js';
 
 const PRINCIPLES = [
   {
@@ -186,6 +187,8 @@ export default function AboutPage() {
           </div>
         ))}
       </div>
+
+      <GlossarySection />
 
       <DashedRule label="SIGNATURES" />
 
@@ -371,6 +374,8 @@ function DesktopAboutLayout() {
         ))}
       </div>
 
+      <GlossarySection />
+
       <DashedRule label="SIGNATURES" />
 
       <div style={{
@@ -420,5 +425,49 @@ function DesktopAboutLayout() {
       pageOf="IV"
       rightSlot={rightSlot}
     />
+  );
+}
+
+// ============================================================
+// GlossarySection — plain-language definitions for every term
+// used on the site. Same data source as the inline ⓘ popovers
+// (lib/glossary.js). Both mobile and desktop About layouts call
+// this; font sizes scale via useIsDesktop.
+// ============================================================
+function GlossarySection() {
+  const isDesktop = useIsDesktop();
+  const titleSize = isDesktop ? 16 : 14;
+  const bodySize = isDesktop ? 13 : 12;
+  return (
+    <>
+      <DashedRule label="GLOSSARY" />
+      <div id="glossary" style={{ scrollMarginTop: 80 }}>
+        <div style={{
+          fontFamily: SB.mono, fontSize: 9.5, color: SB.inkMute,
+          letterSpacing: '0.04em', lineHeight: 1.55,
+          marginBottom: 6, marginTop: -2,
+        }}>
+          Plain-language definitions for every term used on this site.
+        </div>
+        {GLOSSARY_ORDER.map((key) => {
+          const term = GLOSSARY[key];
+          return (
+            <div key={key} style={{
+              padding: '12px 0',
+              borderBottom: `1px dotted ${SB.inkLine}`,
+            }}>
+              <div style={{
+                fontFamily: SB.serif, fontSize: titleSize, fontWeight: 600,
+                color: SB.ink, marginBottom: 6, letterSpacing: '-0.005em',
+              }}>{term.title}</div>
+              <div style={{
+                fontFamily: SB.sans, fontSize: bodySize, lineHeight: 1.55,
+                color: SB.inkSoft, textWrap: 'pretty',
+              }}>{term.body}</div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }

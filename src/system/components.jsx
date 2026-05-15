@@ -4,9 +4,9 @@
 // Button, PageNav, FineFooter, SectionHead, BitcoinLogo.
 // ============================================================
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SB } from './tokens.js';
-import { useTheme } from './theme.jsx';
+import { useTheme, useIsDesktop } from './theme.jsx';
 
 // ------------------------------------------------------------
 // BitcoinLogo — public-domain Wikipedia mark.
@@ -271,6 +271,9 @@ export function DashedRule({ label, dotted = false, color = SB.inkLine }) {
 // SectionHead — numbered (§ I, § II…) section heading with serif title.
 // ------------------------------------------------------------
 export function SectionHead({ no, title, subtitle }) {
+  // Title stays nowrap on the underlined row. Subtitle drops to its own
+  // line below — keeps mobile from wrapping the title when the subtitle
+  // is long (e.g. "whose BTC projection do you trust?").
   return (
     <div style={{ marginTop: 22, marginBottom: 12 }}>
       <div style={{
@@ -278,13 +281,17 @@ export function SectionHead({ no, title, subtitle }) {
         paddingBottom: 6, borderBottom: `1px solid ${SB.ink}`,
       }}>
         <span style={{ fontFamily: SB.mono, fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', color: SB.orange }}>{no}</span>
-        <span style={{ fontFamily: SB.serif, fontSize: 18, fontWeight: 600, color: SB.ink, letterSpacing: '-0.01em' }}>{title}</span>
-        {subtitle && (
-          <span style={{ marginLeft: 'auto', fontFamily: SB.mono, fontSize: 9, color: SB.inkMute, letterSpacing: '0.05em', fontStyle: 'italic' }}>
-            {subtitle}
-          </span>
-        )}
+        <span style={{ fontFamily: SB.serif, fontSize: 18, fontWeight: 600, color: SB.ink, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>{title}</span>
       </div>
+      {subtitle && (
+        <div style={{
+          marginTop: 5,
+          fontFamily: SB.mono, fontSize: 9.5, color: SB.inkMute,
+          letterSpacing: '0.05em', fontStyle: 'italic',
+        }}>
+          {subtitle}
+        </div>
+      )}
     </div>
   );
 }
@@ -293,12 +300,15 @@ export function SectionHead({ no, title, subtitle }) {
 // Row — itemized line with dotted leader. Used in receipts, terms,
 // lender lists. The dots fill the space between label and value.
 // ------------------------------------------------------------
-export function Row({ label, value, sub, valueStyle = {}, labelStyle = {} }) {
+export function Row({ label, value, sub, valueStyle = {}, labelStyle = {}, info = null }) {
   // Two-row grid: label+dots and value share the baseline row; sub
   // drops onto its own row spanning the full width, right-aligned.
   // The value column auto-sizes to the value text only, so the
   // dotted leader extends right up to that text regardless of how
   // wide the sub line happens to be.
+  // `info` is a GLOSSARY definition — when set, renders an ⓘ icon
+  // after the label and switches the label area to overflow:visible
+  // so the popover isn't clipped.
   return (
     <div style={{
       display: 'grid',
@@ -313,10 +323,10 @@ export function Row({ label, value, sub, valueStyle = {}, labelStyle = {} }) {
         fontSize: 11.5,
         color: SB.inkSoft,
         display: 'flex', alignItems: 'baseline', gap: 4,
-        overflow: 'hidden',
+        overflow: info ? 'visible' : 'hidden',
         ...labelStyle,
       }}>
-        <span>{label}</span>
+        <span>{label}{info && <InfoIcon def={info} />}</span>
         <span style={{
           flex: 1, overflow: 'hidden', whiteSpace: 'nowrap',
           color: SB.inkFaint, letterSpacing: '0.08em',
@@ -403,6 +413,143 @@ export function Pill({ children, color = SB.ink, filled = false }) {
       background: filled ? color : 'transparent',
       border: `1px solid ${color}`,
     }}>{children}</span>
+  );
+}
+
+// ------------------------------------------------------------
+// InfoIcon — tiny superscript ⓘ that reveals a popover with a
+// term definition. Data-agnostic: pass `def = { title, body }`,
+// usually a lookup from GLOSSARY in lib/glossary.js. Only used on
+// result tables (Calculator § II + § VI) per the booklet design —
+// see About page for the full glossary.
+//
+// Behavior:
+//   Desktop — hover to open, leaves to close (140 ms grace so the
+//             cursor can travel from icon into the popover).
+//   Mobile  — tap to toggle. No click-outside dismissal (popovers
+//             stay until you tap the icon again or hit Escape).
+// ------------------------------------------------------------
+export function InfoIcon({ def, glossaryHref = '#about' }) {
+  const [open, setOpen] = useState(false);
+  const isDesktop = useIsDesktop();
+  const closeTimerRef = useRef(null);
+
+  // Escape closes — useful for keyboard users, harmless otherwise.
+  useEffect(() => {
+    if (!open) return undefined;
+    function onKey(e) { if (e.key === 'Escape') setOpen(false); }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  // Clear any pending close timer on unmount.
+  useEffect(() => () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+  }, []);
+
+  if (!def) return null;
+
+  const cancelClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimerRef.current = setTimeout(() => {
+      setOpen(false);
+      closeTimerRef.current = null;
+    }, 140);
+  };
+  const handleMouseEnter = () => {
+    if (!isDesktop) return;
+    cancelClose();
+    setOpen(true);
+  };
+  const handleMouseLeave = () => {
+    if (!isDesktop) return;
+    scheduleClose();
+  };
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (isDesktop) return; // desktop is hover-only
+    setOpen((v) => !v);
+  };
+
+  return (
+    <span
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        position: 'relative',
+        display: 'inline-flex',
+        marginLeft: 3,
+        verticalAlign: 'super',
+        lineHeight: 1,
+      }}
+    >
+      <button
+        type="button"
+        onClick={handleClick}
+        onFocus={isDesktop ? cancelClose : undefined}
+        onBlur={isDesktop ? scheduleClose : undefined}
+        aria-label={`What is ${def.title}?`}
+        aria-expanded={open}
+        style={{
+          width: 11, height: 11,
+          padding: 0,
+          background: 'transparent',
+          border: `1px solid ${open ? SB.orange : SB.inkLine}`,
+          borderRadius: '50%',
+          cursor: 'pointer',
+          color: open ? SB.orange : SB.inkMute,
+          fontFamily: SB.serif,
+          fontSize: 7.5,
+          fontStyle: 'italic',
+          fontWeight: 600,
+          lineHeight: 1,
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >i</button>
+      {open && (
+        <div role="tooltip" style={{
+          position: 'absolute',
+          top: 'calc(100% + 4px)',
+          left: 0,
+          width: 280,
+          maxWidth: 'min(280px, calc(100vw - 48px))',
+          background: SB.cream,
+          border: `1.5px solid ${SB.ink}`,
+          padding: '10px 12px 10px',
+          zIndex: 50,
+          boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
+          textAlign: 'left',
+          verticalAlign: 'baseline',
+        }}>
+          <div style={{
+            fontFamily: SB.serif, fontSize: 14, fontWeight: 600,
+            color: SB.ink, letterSpacing: '-0.005em',
+            marginBottom: 6,
+          }}>{def.title}</div>
+          <div style={{
+            fontFamily: SB.mono, fontSize: 10.5, color: SB.inkSoft,
+            lineHeight: 1.55, letterSpacing: '0.01em',
+          }}>{def.body}</div>
+          <a
+            href={glossaryHref}
+            onClick={() => setOpen(false)}
+            style={{
+              display: 'inline-block',
+              marginTop: 10,
+              fontFamily: SB.mono, fontSize: 9, fontWeight: 700,
+              letterSpacing: '0.14em', color: SB.orange,
+              textDecoration: 'none',
+            }}
+          >↗ FULL GLOSSARY</a>
+        </div>
+      )}
+    </span>
   );
 }
 
