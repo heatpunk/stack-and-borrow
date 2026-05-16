@@ -106,7 +106,7 @@
       "repayment": "Interest-only payments during loan, principal due at maturity. Repayment in USD via bank account. No prepayment penalty. Liquidation buffer between 75% and 80% LTV.",
       "notes": "Rate quoted at 50% LTV (8.91% / 9.999% APR with 1% origination fee). Figure prices by LTV, not by loan size — rates rise to ~11.50% at 75% LTV. Up to 75% LTV is the most aggressive available but carries high liquidation risk. Rehypothecates collateral, which subsidizes the rate but increases counterparty risk.",
       "badge": "Highest LTV",
-      "referralUrl": "https://figure.com"
+      "referralUrl": "https://democratizedprime.pxf.io/aNe7dW"
     },
     {
       "id": "milo",
@@ -355,7 +355,7 @@
       "repayment": "Crypto or stablecoin (USDT, USDC) repayment; partial or full repayment any time. Bank transfers available for fiat withdrawal. Interest accrued daily; charged only on amount actually borrowed.",
       "notes": "Base-tier (no NEXO token) APR is 18.9% — drops to 10.9% at Gold and 2.9% at Platinum, which requires holding 10%+ of portfolio in NEXO tokens (itself a real cost). 50% LTV for BTC/ETH; varies by asset (up to 90% for USDC, down to 15% for NEXO). 150+ jurisdictions; US service rolling out via Bakkt partnership in 2026. Multi-collateral CeFi, fully custodial with rehypothecation.",
       "badge": "150+ countries",
-      "referralUrl": "https://nexo.com"
+      "referralUrl": "https://nexo.com/ref/hm77c6fsyu?src=web-link"
     }
   ]
 }

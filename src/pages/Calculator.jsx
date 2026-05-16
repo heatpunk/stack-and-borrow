@@ -458,7 +458,8 @@ export default function CalculatorPage({
               color: SB.ink, letterSpacing: '-0.02em', lineHeight: 1,
               fontVariantNumeric: 'tabular-nums',
             }}>
-              {deltaUsd >= 0 ? '+' : ''}{fmtMoneyCompact(deltaUsd, currency, CURRENCY_META, btcSpotUsd)}
+              {deltaUsd >= 0 ? '+' : ''}
+              <FormattedMoney usd={deltaUsd} currency={currency} spot={btcSpotUsd} />
             </div>
             <div style={{
               fontFamily: SB.mono, fontSize: 9,
@@ -573,6 +574,25 @@ export default function CalculatorPage({
 }
 
 // ============================================================
+// FormattedMoney — renders a compact money value with post-position
+// suffixes ("kr", "sats", "BTC") set at a smaller inline size so the
+// unit can't wrap onto its own line in narrow cells. Pre-position
+// symbols ($, €) come back from fmtMoneyCompact as one token and pass
+// through unchanged.
+// ============================================================
+function FormattedMoney({ usd, currency, spot }) {
+  const s = fmtMoneyCompact(usd, currency, CURRENCY_META, spot);
+  const sp = s.lastIndexOf(' ');
+  if (sp < 0) return <>{s}</>;
+  return (
+    <>
+      {s.slice(0, sp)}
+      <span style={{ fontSize: '0.62em', marginLeft: '0.15em' }}>{s.slice(sp + 1)}</span>
+    </>
+  );
+}
+
+// ============================================================
 // Projection — small SVG sparkline of borrow vs sell paths.
 // ============================================================
 function Projection({ spot, cagr, collateralBtc, totalOwedUsd, collateralBtcAfterSell, currency }) {
@@ -673,7 +693,7 @@ function Projection({ spot, cagr, collateralBtc, totalOwedUsd, collateralBtcAfte
               lineHeight: 1,
               fontVariantNumeric: 'tabular-nums',
             }}>
-              {fmtMoneyCompact(m.val, currency, CURRENCY_META, spot)}
+              <FormattedMoney usd={m.val} currency={currency} spot={spot} />
             </div>
           </div>
         ))}
@@ -1158,7 +1178,8 @@ function DesktopCalculatorLayout(props) {
               color: SB.ink, letterSpacing: '-0.02em', lineHeight: 1,
               fontVariantNumeric: 'tabular-nums',
             }}>
-              {deltaUsd >= 0 ? '+' : ''}{fmtMoneyCompact(deltaUsd, currency, CURRENCY_META, btcSpotUsd)}
+              {deltaUsd >= 0 ? '+' : ''}
+              <FormattedMoney usd={deltaUsd} currency={currency} spot={btcSpotUsd} />
             </div>
             <div style={{
               fontFamily: SB.mono, fontSize: 10,
