@@ -16,7 +16,19 @@ import {
   FineFooter,
   SunMoonStamp,
 } from '../system/components.jsx';
-import { useIsDesktop } from '../system/theme.jsx';
+import { useIsDesktop, useTheme } from '../system/theme.jsx';
+
+// Signature is a white-background PNG of a hand-drawn mark. To make it
+// blend into the paper rather than sit on a visible white card, we use
+// mix-blend-mode: multiply on light themes (white drops out, dark ink
+// shows). On dark themes (carbon/midnight) multiply would kill the mark
+// entirely, so we invert first (white→black, blue→light) and use screen
+// so the now-black background drops out instead.
+function signatureBlend(isDark) {
+  return isDark
+    ? { mixBlendMode: 'screen', filter: 'invert(1)' }
+    : { mixBlendMode: 'multiply' };
+}
 import { DesktopSpreadFrame } from '../system/desktop.jsx';
 import { GLOSSARY_ORDER } from '../lib/glossary.js';
 import { useT } from '../i18n/index.jsx';
@@ -37,6 +49,7 @@ export default function AboutPage() {
   const isDesktop = useIsDesktop();
   if (isDesktop) return <DesktopAboutLayout />;
   const t = useT();
+  const { isDark } = useTheme();
 
   return (
     <PaperFrame>
@@ -169,29 +182,42 @@ export default function AboutPage() {
         display: 'grid', gridTemplateColumns: '1fr 1fr',
         gap: 16, marginTop: 4, marginBottom: 12,
       }}>
-        <div style={{ paddingTop: 28, borderTop: `1.5px solid ${SB.ink}` }}>
-          <div style={{
-            fontFamily: SB.serif, fontStyle: 'italic',
-            fontSize: 18, color: SB.ink, lineHeight: 1,
-            paddingBottom: 4,
-          }}>{t('about.sig.signed')}</div>
-          <div style={{
-            fontFamily: SB.mono, fontSize: 8.5,
-            letterSpacing: '0.18em', color: SB.inkMute,
-            fontWeight: 600,
-          }}>{t('about.sig.signedRole')}</div>
+        <div>
+          <div style={{ height: 56, display: 'flex', alignItems: 'flex-end', overflow: 'hidden' }}>
+            <img
+              src="/signature.png"
+              alt=""
+              aria-hidden="true"
+              style={{
+                width: '88%', maxWidth: 180, height: 'auto',
+                marginBottom: 2, marginLeft: -4,
+                ...signatureBlend(isDark),
+              }}
+            />
+          </div>
+          <div style={{ paddingTop: 6, borderTop: `1.5px solid ${SB.ink}` }}>
+            <div style={{
+              fontFamily: SB.mono, fontSize: 8.5,
+              letterSpacing: '0.18em', color: SB.inkMute,
+              fontWeight: 600,
+            }}>{t('about.sig.signedRole')}</div>
+          </div>
         </div>
-        <div style={{ paddingTop: 28, borderTop: `1.5px solid ${SB.ink}` }}>
-          <div style={{
-            fontFamily: SB.serif, fontStyle: 'italic',
-            fontSize: 13, color: SB.ink, lineHeight: 1.2,
-            paddingBottom: 4,
-          }}>stackandborrow.com</div>
-          <div style={{
-            fontFamily: SB.mono, fontSize: 8.5,
-            letterSpacing: '0.18em', color: SB.inkMute,
-            fontWeight: 600,
-          }}>{t('about.sig.domainRole')}</div>
+        <div>
+          <div style={{ height: 56, display: 'flex', alignItems: 'flex-end' }}>
+            <div style={{
+              fontFamily: SB.mono,
+              fontSize: 11, color: SB.ink, lineHeight: 1.2,
+              paddingBottom: 0,
+            }}>stackandborrow.com</div>
+          </div>
+          <div style={{ paddingTop: 6, borderTop: `1.5px solid ${SB.ink}` }}>
+            <div style={{
+              fontFamily: SB.mono, fontSize: 8.5,
+              letterSpacing: '0.18em', color: SB.inkMute,
+              fontWeight: 600,
+            }}>{t('about.sig.domainRole')}</div>
+          </div>
         </div>
       </div>
 
@@ -217,6 +243,7 @@ export default function AboutPage() {
 // ============================================================
 function DesktopAboutLayout() {
   const t = useT();
+  const { isDark } = useTheme();
   const rightSlot = (
     <div style={{
       fontFamily: SB.mono, fontSize: 10, letterSpacing: '0.14em',
@@ -354,29 +381,42 @@ function DesktopAboutLayout() {
         display: 'grid', gridTemplateColumns: '1fr 1fr',
         gap: 20, marginTop: 4, marginBottom: 14,
       }}>
-        <div style={{ paddingTop: 32, borderTop: `1.5px solid ${SB.ink}` }}>
-          <div style={{
-            fontFamily: SB.serif, fontStyle: 'italic',
-            fontSize: 22, color: SB.ink, lineHeight: 1,
-            paddingBottom: 6,
-          }}>{t('about.sig.signed')}</div>
-          <div style={{
-            fontFamily: SB.mono, fontSize: 9.5,
-            letterSpacing: '0.18em', color: SB.inkMute,
-            fontWeight: 600,
-          }}>{t('about.sig.signedRole')}</div>
+        <div>
+          <div style={{ height: 70, display: 'flex', alignItems: 'flex-end', overflow: 'hidden' }}>
+            <img
+              src="/signature.png"
+              alt=""
+              aria-hidden="true"
+              style={{
+                width: '82%', maxWidth: 220, height: 'auto',
+                marginBottom: 4, marginLeft: -4,
+                ...signatureBlend(isDark),
+              }}
+            />
+          </div>
+          <div style={{ paddingTop: 8, borderTop: `1.5px solid ${SB.ink}` }}>
+            <div style={{
+              fontFamily: SB.mono, fontSize: 9.5,
+              letterSpacing: '0.18em', color: SB.inkMute,
+              fontWeight: 600,
+            }}>{t('about.sig.signedRole')}</div>
+          </div>
         </div>
-        <div style={{ paddingTop: 32, borderTop: `1.5px solid ${SB.ink}` }}>
-          <div style={{
-            fontFamily: SB.serif, fontStyle: 'italic',
-            fontSize: 16, color: SB.ink, lineHeight: 1.2,
-            paddingBottom: 6,
-          }}>stackandborrow.com</div>
-          <div style={{
-            fontFamily: SB.mono, fontSize: 9.5,
-            letterSpacing: '0.18em', color: SB.inkMute,
-            fontWeight: 600,
-          }}>{t('about.sig.domainRole')}</div>
+        <div>
+          <div style={{ height: 70, display: 'flex', alignItems: 'flex-end' }}>
+            <div style={{
+              fontFamily: SB.mono,
+              fontSize: 13, color: SB.ink, lineHeight: 1.2,
+              paddingBottom: 0,
+            }}>stackandborrow.com</div>
+          </div>
+          <div style={{ paddingTop: 8, borderTop: `1.5px solid ${SB.ink}` }}>
+            <div style={{
+              fontFamily: SB.mono, fontSize: 9.5,
+              letterSpacing: '0.18em', color: SB.inkMute,
+              fontWeight: 600,
+            }}>{t('about.sig.domainRole')}</div>
+          </div>
         </div>
       </div>
 
