@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SB } from './tokens.js';
 import { useTheme, useIsDesktop } from './theme.jsx';
+import { useT, useLanguage, LANGUAGE_SWITCH_LABELS } from '../i18n/index.jsx';
 
 // ------------------------------------------------------------
 // BitcoinLogo — public-domain Wikipedia mark.
@@ -88,7 +89,14 @@ const paperStyles = {
 // scales for the open-spread layout.
 // ------------------------------------------------------------
 export function BrandHeader({ rightSlot = null, currentPage = null, pageOf = null, size = 'mobile' }) {
+  const t = useT();
+  const { lang } = useLanguage();
   const big = size === 'desktop';
+  // Locale-format the establishment date in the active language;
+  // fall back to en-US if Intl doesn't recognize the tag.
+  const dateStr = new Date()
+    .toLocaleDateString(lang || 'en-US', { year: 'numeric', month: 'short', day: '2-digit' })
+    .toUpperCase();
   return (
     <div>
       <div style={{
@@ -105,7 +113,7 @@ export function BrandHeader({ rightSlot = null, currentPage = null, pageOf = nul
               letterSpacing: '-0.005em',
               lineHeight: 1, color: SB.ink,
             }}>
-              Stack &amp; Borrow
+              {t('common.brand.name')}
             </div>
             <div style={{
               fontFamily: SB.mono,
@@ -113,7 +121,7 @@ export function BrandHeader({ rightSlot = null, currentPage = null, pageOf = nul
               color: SB.inkMute,
               marginTop: big ? 6 : 5, fontWeight: 600,
             }}>
-              · BITCOIN-BACKED LOANS ·
+              {t('common.brand.tagline')}
             </div>
           </div>
         </a>
@@ -128,11 +136,11 @@ export function BrandHeader({ rightSlot = null, currentPage = null, pageOf = nul
         padding: big ? '10px 0 14px' : '8px 0 12px',
         fontWeight: 500,
       }}>
-        <span>EST · {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).toUpperCase()}</span>
+        <span>{t('common.header.est', { date: dateStr })}</span>
         {currentPage && pageOf ? (
-          <span>{currentPage} OF {pageOf}</span>
+          <span>{t('common.header.pageOf', { current: currentPage, of: pageOf })}</span>
         ) : (
-          <span>NO. 000.50K</span>
+          <span>{t('common.header.issueNumber')}</span>
         )}
       </div>
     </div>
@@ -144,6 +152,7 @@ export function BrandHeader({ rightSlot = null, currentPage = null, pageOf = nul
 // right-click resets to "Match system" (preference = 'auto').
 // ------------------------------------------------------------
 export function SunMoonStamp({ size = 76, rotate = 8, style = {} }) {
+  const t = useT();
   const { theme, toggle, setPreference, preference } = useTheme();
   const isDark = theme !== 'light';
   const onClick = (e) => {
@@ -160,8 +169,8 @@ export function SunMoonStamp({ size = 76, rotate = 8, style = {} }) {
   const ringId = `sb-sm-ring-${size}`;
 
   const title = preference === 'auto'
-    ? `Theme: auto (${theme}) — click to override`
-    : `Theme: ${theme} — click to flip, ⌘-click to match system`;
+    ? t('common.theme.titleAuto', { theme })
+    : t('common.theme.title', { theme });
 
   return (
     <button
@@ -190,7 +199,7 @@ export function SunMoonStamp({ size = 76, rotate = 8, style = {} }) {
         </defs>
         <text fill={fg} style={{ fontFamily: SB.mono, fontWeight: 700, letterSpacing: '0.22em' }} fontSize={size * 0.11}>
           <textPath href={`#${ringId}`} startOffset="0">
-            {isDark ? '★ DARK · NIGHT MODE · TAP TO SWITCH ' : '★ LIGHT · DAY MODE · TAP TO SWITCH '}
+            {isDark ? t('common.theme.dark') : t('common.theme.light')}
           </textPath>
         </text>
       </svg>
@@ -326,7 +335,7 @@ export function Row({ label, value, sub, valueStyle = {}, labelStyle = {}, info 
         overflow: info ? 'visible' : 'hidden',
         ...labelStyle,
       }}>
-        <span>{label}{info && <InfoIcon def={info} />}</span>
+        <span>{label}{info && <InfoIcon {...info} />}</span>
         <span style={{
           flex: 1, overflow: 'hidden', whiteSpace: 'nowrap',
           color: SB.inkFaint, letterSpacing: '0.08em',
@@ -429,7 +438,14 @@ export function Pill({ children, color = SB.ink, filled = false }) {
 //   Mobile  — tap to toggle. No click-outside dismissal (popovers
 //             stay until you tap the icon again or hit Escape).
 // ------------------------------------------------------------
-export function InfoIcon({ def, glossaryHref = '#about' }) {
+export function InfoIcon({ term, def, glossaryHref = '#about' }) {
+  const t = useT();
+  // Preferred API: pass a `term` key (e.g. "collateral") and resolve
+  // title/body via the i18n glossary so popovers are translated.
+  // Legacy `def` prop is still supported for any unmigrated callers.
+  const resolved = term
+    ? { title: t(`glossary.${term}.title`), body: t(`glossary.${term}.body`) }
+    : def;
   const [open, setOpen] = useState(false);
   const isDesktop = useIsDesktop();
   const closeTimerRef = useRef(null);
@@ -447,7 +463,7 @@ export function InfoIcon({ def, glossaryHref = '#about' }) {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
   }, []);
 
-  if (!def) return null;
+  if (!resolved) return null;
 
   const cancelClose = () => {
     if (closeTimerRef.current) {
@@ -494,7 +510,7 @@ export function InfoIcon({ def, glossaryHref = '#about' }) {
         onClick={handleClick}
         onFocus={isDesktop ? cancelClose : undefined}
         onBlur={isDesktop ? scheduleClose : undefined}
-        aria-label={`What is ${def.title}?`}
+        aria-label={t('common.glossary.iconLabel', { term: resolved.title })}
         aria-expanded={open}
         style={{
           width: 11, height: 11,
@@ -531,11 +547,11 @@ export function InfoIcon({ def, glossaryHref = '#about' }) {
             fontFamily: SB.serif, fontSize: 14, fontWeight: 600,
             color: SB.ink, letterSpacing: '-0.005em',
             marginBottom: 6,
-          }}>{def.title}</div>
+          }}>{resolved.title}</div>
           <div style={{
             fontFamily: SB.mono, fontSize: 10.5, color: SB.inkSoft,
             lineHeight: 1.55, letterSpacing: '0.01em',
-          }}>{def.body}</div>
+          }}>{resolved.body}</div>
           <a
             href={glossaryHref}
             onClick={() => setOpen(false)}
@@ -546,7 +562,7 @@ export function InfoIcon({ def, glossaryHref = '#about' }) {
               letterSpacing: '0.14em', color: SB.orange,
               textDecoration: 'none',
             }}
-          >↗ FULL GLOSSARY</a>
+          >{t('common.glossary.link')}</a>
         </div>
       )}
     </span>
@@ -612,11 +628,12 @@ export function Button({ children, onClick, href, color = SB.ink, fill = true, f
 // Lenders, Terms.
 // ------------------------------------------------------------
 export function PageNav({ active = 'landing' }) {
+  const t = useT();
   const pages = [
-    { id: 'landing', label: 'OVERVIEW',   no: 'I',   href: '#' },
-    { id: 'calc',    label: 'CALCULATOR', no: 'II',  href: '#calculator' },
-    { id: 'lender',  label: 'LENDERS',    no: 'III', href: '#lenders' },
-    { id: 'about',   label: 'TERMS',      no: 'IV',  href: '#about' },
+    { id: 'landing', label: t('common.nav.overview'),   no: 'I',   href: '#' },
+    { id: 'calc',    label: t('common.nav.calculator'), no: 'II',  href: '#calculator' },
+    { id: 'lender',  label: t('common.nav.lenders'),    no: 'III', href: '#lenders' },
+    { id: 'about',   label: t('common.nav.terms'),      no: 'IV',  href: '#about' },
   ];
   return (
     <div style={{
@@ -662,9 +679,52 @@ export function PageNav({ active = 'landing' }) {
 }
 
 // ------------------------------------------------------------
+// LanguageSwitchLink — the "View in English" toggle for the
+// FineFooter. Shows only when the active language and the
+// detected language differ enough to make switching meaningful:
+//   - viewing in a non-English language → offer English
+//   - viewing in English while detected is non-English → offer
+//     the way back, labelled in that language's own tongue
+//   - viewing in English with no detected mismatch → render nothing
+// ------------------------------------------------------------
+function LanguageSwitchLink() {
+  const { lang, detectedLang, setLanguage } = useLanguage();
+
+  let target = null;
+  let label = null;
+  if (lang !== 'en') {
+    target = 'en';
+    label = LANGUAGE_SWITCH_LABELS.en;
+  } else if (detectedLang !== 'en' && LANGUAGE_SWITCH_LABELS[detectedLang]) {
+    target = detectedLang;
+    label = LANGUAGE_SWITCH_LABELS[detectedLang];
+  }
+  if (!target) return null;
+
+  const onClick = (e) => {
+    e.preventDefault();
+    setLanguage(target);
+  };
+  return (
+    <>
+      <br />
+      ※{' '}
+      <a
+        href="#"
+        onClick={onClick}
+        style={{ color: SB.inkSoft, textDecoration: 'underline' }}
+      >
+        {label}
+      </a>
+    </>
+  );
+}
+
+// ------------------------------------------------------------
 // FineFooter — the ※ disclaimer lines.
 // ------------------------------------------------------------
 export function FineFooter({ source = 'mempool.space', updated = null }) {
+  const t = useT();
   return (
     <div style={{
       marginTop: 18,
@@ -674,10 +734,11 @@ export function FineFooter({ source = 'mempool.space', updated = null }) {
       lineHeight: 1.7,
       letterSpacing: '0.02em',
     }}>
-      ※ Live BTC: {source} · ranked by total cost, not commission.<br />
-      ※ Not financial advice. No data leaves your browser.<br />
-      ※ stackandborrow.com · <a href="mailto:feedback@stackandborrow.com" style={{ color: SB.inkSoft, textDecoration: 'underline' }}>feedback@stackandborrow.com</a>
-      {updated && <><br />※ Lender data verified {updated}.</>}
+      {t('common.footer.btcSource', { source })}<br />
+      {t('common.footer.disclaimer')}<br />
+      {t('common.footer.contact')}<a href="mailto:feedback@stackandborrow.com" style={{ color: SB.inkSoft, textDecoration: 'underline' }}>feedback@stackandborrow.com</a>
+      {updated && <><br />{t('common.footer.dataVerified', { updated })}</>}
+      <LanguageSwitchLink />
     </div>
   );
 }
@@ -686,6 +747,7 @@ export function FineFooter({ source = 'mempool.space', updated = null }) {
 // LivePriceBadge — small "BTC · $X" indicator used in the header.
 // ------------------------------------------------------------
 export function LivePriceBadge({ btcUsd, loading, error, onRefresh }) {
+  const t = useT();
   const dotColor = loading ? SB.orange : error ? SB.rust : SB.forest;
   return (
     <div style={{
@@ -708,15 +770,15 @@ export function LivePriceBadge({ btcUsd, loading, error, onRefresh }) {
       <button
         type="button"
         onClick={onRefresh}
-        aria-label={!error && !loading ? 'Refresh live BTC price' : undefined}
-        title={!error && !loading ? 'Refresh' : undefined}
+        aria-label={!error && !loading ? t('common.livePrice.refreshLabel') : undefined}
+        title={!error && !loading ? t('common.livePrice.refresh') : undefined}
         style={{
           background: 'transparent', border: 'none', padding: 0,
           color: SB.inkMute, fontFamily: SB.mono, fontSize: 9,
           letterSpacing: '0.12em', cursor: 'pointer',
         }}
       >
-        {error ? 'RETRY ↻' : loading ? 'FETCHING…' : '↻'}
+        {error ? t('common.livePrice.retry') : loading ? t('common.livePrice.fetching') : '↻'}
       </button>
     </div>
   );
