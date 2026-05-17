@@ -18,6 +18,13 @@ import React, {
 import en from './en.js';
 import { detectLanguageFromLocale } from '../lib/hooks.js';
 
+// Static map of locale loaders — Vite needs to see each candidate
+// import target at build time to emit them as separate chunks.
+// `import(\`./${lang}.js\`)` works in dev but Rollup can't analyze
+// the template literal and silently ships *no* locale chunks in
+// production. import.meta.glob fixes that.
+const LOCALE_LOADERS = import.meta.glob('./*.js');
+
 export const SUPPORTED_LANGUAGES = ['en', 'sv', 'de', 'es', 'fr', 'pt'];
 
 // Native names for the switcher, used both as the link label and
@@ -91,7 +98,13 @@ export function LanguageProvider({ children }) {
       setStrings(en);
       return () => { cancelled = true; };
     }
-    import(`./${lang}.js`)
+    const loader = LOCALE_LOADERS[`./${lang}.js`];
+    if (!loader) {
+      // Unknown language — stay on English.
+      setStrings(en);
+      return () => { cancelled = true; };
+    }
+    loader()
       .then((mod) => {
         if (cancelled) return;
         // Fall through to English for any missing keys.
