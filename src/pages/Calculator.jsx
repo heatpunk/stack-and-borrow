@@ -128,6 +128,13 @@ export default function CalculatorPage({
     setLoanInCurrency(Number(e.target.value));
   }, [setLoanInCurrency]);
 
+  const onAmountChange = useCallback((e) => {
+    const cleaned = e.target.value.replace(/[^\d]/g, '');
+    if (cleaned === '') { setLoanInCurrency(0); return; }
+    const n = Number(cleaned);
+    if (!isNaN(n)) setLoanInCurrency(n);
+  }, [setLoanInCurrency]);
+
   // Cycle through supported currencies, preserving the loan's USD value.
   const cycleCurrency = useCallback(() => {
     const keys = Object.keys(CURRENCY_META);
@@ -187,6 +194,7 @@ export default function CalculatorPage({
         cycleCurrency={cycleCurrency}
         loanInCurrency={loanInCurrency}
         onSlide={onSlide}
+        onAmountChange={onAmountChange}
         min={min} max={max} step={step}
         loanUsd={loanUsd}
         btcSpotUsd={btcSpotUsd}
@@ -217,6 +225,28 @@ export default function CalculatorPage({
 
   return (
     <PaperFrame>
+      <style>{`
+        .cp-amount-input {
+          background: transparent;
+          border: none;
+          outline: none;
+          padding: 0;
+          margin: 0;
+          font-family: ${SB.serif};
+          font-size: 46px;
+          font-weight: 600;
+          color: ${SB.ink};
+          letter-spacing: -0.025em;
+          line-height: 1;
+          font-variant-numeric: tabular-nums;
+          width: 100%;
+          min-width: 0;
+          text-align: center;
+          caret-color: ${SB.orange};
+        }
+        .cp-amount-input::placeholder { color: ${SB.inkFaint}; }
+      `}</style>
+
       <BrandHeader
         currentPage="II"
         pageOf="IV"
@@ -246,32 +276,28 @@ export default function CalculatorPage({
           color: SB.orange, fontWeight: 700,
         }}>{t('calc.amount.label')}</div>
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
         }}>
-          <div style={{
-            flex: 1, minWidth: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-          }}>
-            {CURRENCY_META[currency].position === 'pre' && (
-              <span style={{ fontFamily: SB.serif, fontSize: 32, fontWeight: 400, color: SB.inkMute, lineHeight: 1 }}>
-                {CURRENCY_META[currency].symbol}
-              </span>
-            )}
+          {CURRENCY_META[currency].position === 'pre' && (
+            <span style={{ fontFamily: SB.serif, fontSize: 32, fontWeight: 400, color: SB.inkMute, lineHeight: 1, flexShrink: 0 }}>
+              {CURRENCY_META[currency].symbol}
+            </span>
+          )}
+          <input
+            className="cp-amount-input"
+            type="text"
+            inputMode="numeric"
+            aria-label={t('calc.amount.inputLabel')}
+            value={fmtNum(loanInCurrency)}
+            onChange={onAmountChange}
+            onFocus={(e) => e.target.select()}
+          />
+          {CURRENCY_META[currency].position === 'post' && (
             <span style={{
-              fontFamily: SB.serif, fontSize: 46, fontWeight: 600,
-              color: SB.ink, letterSpacing: '-0.025em', lineHeight: 1,
-              fontVariantNumeric: 'tabular-nums',
-            }}>{fmtNum(loanInCurrency)}</span>
-            {CURRENCY_META[currency].position === 'post' && (
-              <span style={{
-                fontFamily: SB.mono, fontSize: 16, fontWeight: 500,
-                color: SB.inkMute, marginLeft: 4,
-              }}>{CURRENCY_META[currency].symbol}</span>
-            )}
-          </div>
-          <button onClick={cycleCurrency} style={{ ...pickerBtn, flexShrink: 0 }}>
-            {CURRENCY_META[currency].label} ▾
-          </button>
+              fontFamily: SB.mono, fontSize: 16, fontWeight: 500,
+              color: SB.inkMute, marginLeft: 4, flexShrink: 0,
+            }}>{CURRENCY_META[currency].symbol}</span>
+          )}
         </div>
 
         {/* Slider */}
@@ -1282,7 +1308,7 @@ function DesktopCalculatorLayout(props) {
   const t = useT();
   const {
     live, currency, cycleCurrency,
-    loanInCurrency, onSlide, min, max, step,
+    loanInCurrency, onSlide, onAmountChange, min, max, step,
     loanUsd, btcSpotUsd,
     collateralBtc, collateralSats,
     liqUsd, liqDropPct,
@@ -1331,21 +1357,46 @@ function DesktopCalculatorLayout(props) {
         flexDirection: 'column',
         gap: 16,
       }}>
+        <style>{`
+          .dc-amount-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 0;
+            margin: 0;
+            font-family: ${SB.serif};
+            font-size: 60px;
+            font-weight: 600;
+            color: ${SB.ink};
+            letter-spacing: -0.025em;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            width: 100%;
+            min-width: 0;
+            text-align: center;
+            caret-color: ${SB.orange};
+          }
+          .dc-amount-input::placeholder { color: ${SB.inkFaint}; }
+        `}</style>
         <div style={{
           fontFamily: SB.mono, fontSize: 10, letterSpacing: '0.22em',
           color: SB.orange, fontWeight: 700,
         }}>{t('calc.amount.label')}</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           {meta.position === 'pre' && (
-            <span style={{ fontFamily: SB.serif, fontSize: 38, fontWeight: 400, color: SB.inkMute, lineHeight: 1 }}>{meta.symbol}</span>
+            <span style={{ fontFamily: SB.serif, fontSize: 38, fontWeight: 400, color: SB.inkMute, lineHeight: 1, flexShrink: 0 }}>{meta.symbol}</span>
           )}
-          <span style={{
-            fontFamily: SB.serif, fontSize: 60, fontWeight: 600,
-            color: SB.ink, letterSpacing: '-0.025em', lineHeight: 1,
-            fontVariantNumeric: 'tabular-nums',
-          }}>{fmtNum(loanInCurrency)}</span>
+          <input
+            className="dc-amount-input"
+            type="text"
+            inputMode="numeric"
+            aria-label={t('calc.amount.inputLabel')}
+            value={fmtNum(loanInCurrency)}
+            onChange={onAmountChange}
+            onFocus={(e) => e.target.select()}
+          />
           {meta.position === 'post' && (
-            <span style={{ fontFamily: SB.mono, fontSize: 22, fontWeight: 500, color: SB.inkMute, marginLeft: 6 }}>{meta.symbol}</span>
+            <span style={{ fontFamily: SB.mono, fontSize: 22, fontWeight: 500, color: SB.inkMute, marginLeft: 6, flexShrink: 0 }}>{meta.symbol}</span>
           )}
         </div>
 
