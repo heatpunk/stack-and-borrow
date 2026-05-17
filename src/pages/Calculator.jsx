@@ -934,7 +934,7 @@ function MaturityOption({ rn, label, primary, primarySub, right, rightSub, tone,
 function LongViewSection({
   lender, loanUsd, collateralBtc, btcSpotUsd,
   activeCagr, profileId, caseId, profiles,
-  currency, fmt,
+  currency, fmt, desktop,
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -1179,7 +1179,34 @@ function LongViewSection({
           </div>
 
           {/* Stack value box — fiat verdict of what's left, mirrors § IV NET WORTH box */}
-          {sane && !underwater && btcRemaining > 0 && (
+          {sane && !underwater && btcRemaining > 0 && (desktop ? (
+            <div style={{
+              padding: '14px 12px 12px', marginTop: 10,
+              border: `1.5px dashed ${SB.forest}`,
+              background: SB.forestWash,
+            }}>
+              <div style={{
+                fontFamily: SB.mono, fontSize: 10.5, fontWeight: 700,
+                letterSpacing: '0.2em', color: SB.forest,
+              }}>{t('calc.longView.stackValue.label', { years })}</div>
+              <div style={{
+                fontFamily: SB.serif, fontSize: 26, fontWeight: 600,
+                color: SB.forest, letterSpacing: '-0.02em', lineHeight: 1,
+                fontVariantNumeric: 'tabular-nums',
+                textAlign: 'center', marginTop: 12,
+              }}>
+                {fmt(btcRemaining * btcPriceAtN)}
+              </div>
+              <div style={{
+                fontFamily: SB.mono, fontSize: 9,
+                color: SB.forest,
+                marginTop: 4, fontWeight: 700, letterSpacing: '0.1em',
+                textAlign: 'right',
+              }}>
+                {t('calc.longView.stackValue.kept')}
+              </div>
+            </div>
+          ) : (
             <div style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               padding: '14px 12px 12px', marginTop: 10,
@@ -1213,7 +1240,7 @@ function LongViewSection({
                 </div>
               </div>
             </div>
-          )}
+          ))}
 
           {/* Bear-case caveat */}
           {underwater && activeCagr < 0 && (
@@ -1471,37 +1498,29 @@ function DesktopCalculatorLayout(props) {
         />
 
         <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           padding: '20px 18px 18px', marginTop: 14,
           border: `1.5px dashed ${SB.orange}`,
           background: SB.orangeWash,
         }}>
-          <div>
-            <div style={{
-              fontFamily: SB.mono, fontSize: 12, fontWeight: 700,
-              letterSpacing: '0.2em', color: SB.orange,
-            }}>{t('calc.verdict.netWorth')}</div>
-            <div style={{
-              fontFamily: SB.mono, fontSize: 10,
-              color: SB.inkMute, marginTop: 4, letterSpacing: '0.06em',
-            }}>{t('calc.verdict.netWorthSub', { case: caseId, profile: profileId })}</div>
+          <div style={{
+            fontFamily: SB.mono, fontSize: 12, fontWeight: 700,
+            letterSpacing: '0.2em', color: SB.orange,
+          }}>{t('calc.verdict.netWorth')}</div>
+          <div style={{
+            fontFamily: SB.serif, fontSize: 32, fontWeight: 600,
+            color: SB.ink, letterSpacing: '-0.02em', lineHeight: 1,
+            fontVariantNumeric: 'tabular-nums',
+            textAlign: 'center', marginTop: 14,
+          }}>
+            {(deltaUsd >= 0 ? '+' : '−') + fmt(Math.abs(deltaUsd))}
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{
-              fontFamily: SB.serif, fontSize: 32, fontWeight: 600,
-              color: SB.ink, letterSpacing: '-0.02em', lineHeight: 1,
-              fontVariantNumeric: 'tabular-nums',
-            }}>
-              {deltaUsd >= 0 ? '+' : ''}
-              <FormattedMoney usd={deltaUsd} currency={currency} spot={btcSpotUsd} />
-            </div>
-            <div style={{
-              fontFamily: SB.mono, fontSize: 10,
-              color: deltaUsd >= 0 ? SB.forest : SB.rust,
-              marginTop: 6, fontWeight: 700, letterSpacing: '0.12em',
-            }}>
-              {deltaUsd >= 0 ? t('calc.verdict.keepStack') : t('calc.verdict.sellWins')}
-            </div>
+          <div style={{
+            fontFamily: SB.mono, fontSize: 10,
+            color: deltaUsd >= 0 ? SB.forest : SB.rust,
+            marginTop: 6, fontWeight: 700, letterSpacing: '0.12em',
+            textAlign: 'right',
+          }}>
+            {deltaUsd >= 0 ? t('calc.verdict.keepStack') : t('calc.verdict.sellWins')}
           </div>
         </div>
       </div>
@@ -1624,6 +1643,7 @@ function DesktopCalculatorLayout(props) {
         profiles={profiles}
         currency={currency}
         fmt={fmt}
+        desktop
       />
     </div>
   );

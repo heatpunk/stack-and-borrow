@@ -2,25 +2,26 @@
 // FORMAT — display helpers. Pure functions, no React.
 // ============================================================
 
-// Narrow no-break space — thousands separator (Swedish/European style).
-const THIN = '\u202F';
+// Non-breaking space — used between thousands and before unit/currency
+// suffixes so the number and its unit can't be split across lines.
+const NBSP = ' ';
 
 export const SATS_PER_BTC = 100_000_000;
 
-// Format an integer with thin-space thousands separators.
+// Format an integer with non-breaking-space thousands separators.
 // fmtNum(1234567) → "1 234 567"
 export function fmtNum(n) {
   if (n == null || isNaN(n)) return '—';
   const sign = n < 0 ? '-' : '';
   const abs = Math.abs(Math.round(n));
-  return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, THIN);
+  return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, NBSP);
 }
 
 // Format sats — falls back to BTC at large values.
 export function fmtSats(sats) {
   if (sats == null || isNaN(sats)) return '—';
-  if (Math.abs(sats) >= 1e8) return (sats / 1e8).toFixed(4) + ' BTC';
-  return fmtNum(sats) + ' sats';
+  if (Math.abs(sats) >= 1e8) return (sats / 1e8).toFixed(4) + NBSP + 'BTC';
+  return fmtNum(sats) + NBSP + 'sats';
 }
 
 // Format an amount expressed in USD into the given currency.
@@ -33,7 +34,7 @@ export function fmtMoney(usd, currency, currencyMeta, btcSpotUsd) {
   const meta = currencyMeta[currency];
   if (!meta) return '$' + fmtNum(usd);
   const val = usd / meta.fxToUsd;
-  if (meta.position === 'post') return fmtNum(val) + ' ' + meta.symbol;
+  if (meta.position === 'post') return fmtNum(val) + NBSP + meta.symbol;
   return meta.symbol + fmtNum(val);
 }
 
