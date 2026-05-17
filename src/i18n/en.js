@@ -168,8 +168,6 @@ export default {
   'landing.feature.liquidation.subDesktop': 'Live price-drop math. Six 50%+ drawdowns since 2013. Not if, when.',
 
   'landing.quote.eyebrow': 'FROM THE FIELD',
-  'landing.quote.body': '"Selling triggers tax. Borrowing doesn\'t. That\'s not a loophole — that\'s the whole point."',
-  'landing.quote.attribution': '— A LONG-TERM HOLDER · NAME WITHHELD',
 
   'landing.saveTip.label': 'SAVE SCENARIO',
   'landing.saveTip.close': 'Close tip',

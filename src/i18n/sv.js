@@ -165,9 +165,6 @@ export default {
   'landing.feature.liquidation.subDesktop': 'Realtidsmatte för prisfall. Sex 50 %+ nedgångar sedan 2013. Inte om, utan när.',
 
   'landing.quote.eyebrow': 'FRÅN VERKLIGHETEN',
-  // Quote intentionally kept in English on all locales — editorial decision.
-  'landing.quote.body': '"Selling triggers tax. Borrowing doesn\'t. That\'s not a loophole — that\'s the whole point."',
-  'landing.quote.attribution': '— A LONG-TERM HOLDER · NAME WITHHELD',
 
   'landing.saveTip.label': 'SPARA SCENARIO',
   'landing.saveTip.close': 'Stäng tipset',

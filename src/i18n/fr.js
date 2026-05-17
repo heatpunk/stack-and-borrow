@@ -165,9 +165,6 @@ export default {
   'landing.feature.liquidation.subDesktop': "Maths de chute en temps réel. Six baisses de 50 %+ depuis 2013. Pas si, mais quand.",
 
   'landing.quote.eyebrow': 'DU TERRAIN',
-  // Quote intentionally kept in English on all locales — editorial decision.
-  'landing.quote.body': '"Selling triggers tax. Borrowing doesn\'t. That\'s not a loophole — that\'s the whole point."',
-  'landing.quote.attribution': '— A LONG-TERM HOLDER · NAME WITHHELD',
 
   'landing.saveTip.label': 'ENREGISTRER SCÉNARIO',
   'landing.saveTip.close': 'Fermer le conseil',

@@ -165,9 +165,6 @@ export default {
   'landing.feature.liquidation.subDesktop': 'Matemáticas de caída en tiempo real. Seis caídas >50 % desde 2013. No si, sino cuándo.',
 
   'landing.quote.eyebrow': 'DESDE EL TERRENO',
-  // Quote intentionally kept in English on all locales — editorial decision.
-  'landing.quote.body': '"Selling triggers tax. Borrowing doesn\'t. That\'s not a loophole — that\'s the whole point."',
-  'landing.quote.attribution': '— A LONG-TERM HOLDER · NAME WITHHELD',
 
   'landing.saveTip.label': 'GUARDAR ESCENARIO',
   'landing.saveTip.close': 'Cerrar consejo',

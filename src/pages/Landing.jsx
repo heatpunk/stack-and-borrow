@@ -49,12 +49,63 @@ const CHIP_CURRENCIES = ['USD', 'EUR', 'GBP', 'SEK', 'SAT'];
 const FEATURE_IDS = ['ranking', 'tax', 'projection', 'liquidation'];
 const FEATURE_NUMERALS = ['I.', 'II.', 'III.', 'IV.'];
 
+// Rotating pull quote shown in the "FROM THE FIELD" card. Quotes stay in
+// English in every locale by design. A fresh quote is picked per mount;
+// the last index is stored in localStorage so consecutive page loads
+// never repeat the same one.
+const FIELD_QUOTES = [
+  { text: 'Stay humble and stack sats.',                                                                                attribution: 'MATT ODELL' },
+  { text: 'Bitcoin is hope.',                                                                                            attribution: 'MICHAEL SAYLOR' },
+  { text: 'Not your keys, not your coins.',                                                                              attribution: 'ANDREAS ANTONOPOULOS' },
+  { text: 'Running bitcoin.',                                                                                            attribution: 'HAL FINNEY · 2009' },
+  { text: 'Bitcoin is the hardest money ever invented.',                                                                 attribution: 'SAIFEDEAN AMMOUS' },
+  { text: 'If you don’t believe me or don’t get it, I don’t have time to try to convince you, sorry.',    attribution: 'SATOSHI NAKAMOTO' },
+  { text: 'Bitcoin changes absolutely everything.',                                                                      attribution: 'JACK DORSEY' },
+  { text: 'Lost coins only make everyone else’s coins worth slightly more. Think of it as a donation to everyone.', attribution: 'SATOSHI NAKAMOTO' },
+  { text: 'Selling triggers tax. Borrowing doesn’t. That’s not a loophole — that’s the whole point.', attribution: 'A LONG-TERM HOLDER · NAME WITHHELD' },
+  { text: 'Stack sats. Borrow dollars. Never the reverse.',                                                              attribution: 'A PATIENT STACKER · NAME WITHHELD' },
+  { text: 'Your bitcoin doesn’t need to leave your wallet to work for you.',                                        attribution: 'FROM THE FIELD' },
+  { text: 'Selling bitcoin to buy a house is cutting up the goose for one more egg.',                                    attribution: 'A LONG-TERM HOLDER' },
+  { text: 'The bank rents me dollars. I keep the bitcoin.',                                                              attribution: 'A PRACTICAL MAXI' },
+  { text: '1 BTC = 1 BTC. The denominator is what changes.',                                                             attribution: 'ANONYMOUS HOLDER' },
+  { text: 'Time in bitcoin beats timing bitcoin. Loans bridge the gap.',                                                 attribution: 'NAME WITHHELD' },
+];
+
+// Pick a uniformly random index that differs from the last one shown.
+// Reads/writes the last index from localStorage so the no-repeat rule
+// survives page reloads.
+function pickFieldQuoteIndex() {
+  if (typeof window === 'undefined') return 0;
+  let lastIdx = -1;
+  try {
+    const stored = window.localStorage.getItem('stackandborrow:lastQuoteIdx');
+    if (stored !== null) lastIdx = parseInt(stored, 10);
+  } catch (e) { /* storage disabled */ }
+
+  let nextIdx;
+  if (FIELD_QUOTES.length <= 1 || lastIdx < 0 || lastIdx >= FIELD_QUOTES.length) {
+    nextIdx = Math.floor(Math.random() * FIELD_QUOTES.length);
+  } else {
+    // Pick uniformly from the (N - 1) indices that aren't lastIdx.
+    nextIdx = Math.floor(Math.random() * (FIELD_QUOTES.length - 1));
+    if (nextIdx >= lastIdx) nextIdx++;
+  }
+
+  try {
+    window.localStorage.setItem('stackandborrow:lastQuoteIdx', String(nextIdx));
+  } catch (e) { /* storage disabled */ }
+
+  return nextIdx;
+}
+
 export default function LandingPage({ live, lenders = [], region, initialCurrency }) {
   const isDesktop = useIsDesktop();
   const t = useT();
   const [currency, setCurrency]           = usePersistentState('currency', initialCurrency || 'USD');
   const [loanInCurrency, setLoanInCurrency] = usePersistentState('desiredLoan', 50000);
   const [showSaveTip, setShowSaveTip]     = useState(false);
+  const [fieldQuoteIdx]                   = useState(pickFieldQuoteIndex);
+  const fieldQuote = FIELD_QUOTES[fieldQuoteIdx];
 
   const btcSpotUsd = live?.btcUsd || 100000;
   const meta = CURRENCY_META[currency];
@@ -138,6 +189,7 @@ export default function LandingPage({ live, lenders = [], region, initialCurrenc
         showSaveTip={showSaveTip}
         setShowSaveTip={setShowSaveTip}
         btcSpotUsd={btcSpotUsd}
+        fieldQuote={fieldQuote}
       />
     );
   }
@@ -494,7 +546,7 @@ export default function LandingPage({ live, lenders = [], region, initialCurrenc
           color: SB.ink,
           textWrap: 'pretty',
         }}>
-          {t('landing.quote.body')}
+          &ldquo;{fieldQuote.text}&rdquo;
         </p>
       </div>
 
@@ -595,6 +647,7 @@ function DesktopLandingLayout({
   aprPct, bestLender, interestUsd, origFeeUsd,
   liqUsd, liqDropPct, satsToSell,
   ranked, showSaveTip, setShowSaveTip, btcSpotUsd,
+  fieldQuote,
 }) {
   const t = useT();
   const top3 = ranked.slice(0, 3);
@@ -870,14 +923,14 @@ function DesktopLandingLayout({
           color: SB.ink, textWrap: 'pretty',
           letterSpacing: '-0.005em',
         }}>
-          {t('landing.quote.body')}
+          &ldquo;{fieldQuote.text}&rdquo;
         </p>
         <div style={{
           marginTop: 18,
           fontFamily: SB.mono, fontSize: 10, fontWeight: 700,
           letterSpacing: '0.18em', color: SB.orange,
         }}>
-          {t('landing.quote.attribution')}
+          — {fieldQuote.attribution}
         </div>
       </div>
 
