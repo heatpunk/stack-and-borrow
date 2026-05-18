@@ -24,11 +24,10 @@ import {
   LivePriceBadge,
 } from '../system/components.jsx';
 import { useIsDesktop } from '../system/theme.jsx';
-import { rankLenders } from '../lib/math.js';
-import { fmtMoney, fmtNum } from '../lib/format.js';
+import { rankLenders, toUsd } from '../lib/math.js';
+import { fmtMoney, fmtMoneyCompact, fmtNum } from '../lib/format.js';
+import { usePersistentState } from '../lib/hooks.js';
 import { VoidState404 } from './Void.jsx';
-
-const QUOTE_LOAN_USD = 50000;
 
 function custodyLabel(l) {
   if (l.custodyType === 'multisig') {
@@ -58,18 +57,23 @@ function rehypoTone(l) {
 export default function LenderDetailPage({ id, lenders, lastUpdated, live, currency, region }) {
   const isDesktop = useIsDesktop();
 
+  // Read the calculator's persisted loan amount so all pages
+  // (Landing, Calculator, Lenders, Compare) show the same quote size.
+  const [loanInCurrency] = usePersistentState('desiredLoan', 50000);
+  const loanUsd = toUsd(loanInCurrency, currency, CURRENCY_META, live.btcUsd);
+
   // Rank the full directory so we can show this lender's position
   // and pick adjacent neighbors for the "compare with…" block.
   const ranked = useMemo(() => {
     if (!lenders || lenders.length === 0) return [];
     return rankLenders(lenders, {
-      loanUsd: QUOTE_LOAN_USD,
+      loanUsd,
       region: region || 'global',
       ltvPct: LTV_PCT,
       termMonths: TERM_MONTHS,
       eligibleOnly: false,
     });
-  }, [lenders, region]);
+  }, [lenders, region, loanUsd]);
 
   const idx = ranked.findIndex((l) => l.id === id);
   const lender = idx >= 0 ? ranked[idx] : null;
@@ -96,14 +100,15 @@ export default function LenderDetailPage({ id, lenders, lastUpdated, live, curre
   if (idx < ranked.length - 1) { peers.push(ranked[idx + 1]); seen.add(ranked[idx + 1].id); }
   if (!seen.has(ranked[0].id)) peers.push(ranked[0]);
 
-  const props = { lender, ranked, idx, peers, currency, live, lastUpdated };
+  const props = { lender, ranked, idx, peers, currency, live, lastUpdated, loanUsd };
   return isDesktop ? <DesktopLayout {...props} /> : <MobileLayout {...props} />;
 }
 
 // ============================================================
 // MOBILE
 // ============================================================
-function MobileLayout({ lender, ranked, idx, peers, currency, live, lastUpdated }) {
+function MobileLayout({ lender, ranked, idx, peers, currency, live, lastUpdated, loanUsd }) {
+  const quoteLabel = `QUOTE · ${fmtMoneyCompact(loanUsd, currency, CURRENCY_META, live.btcUsd)} · 12MO · 50% LTV`;
   return (
     <PaperFrame>
       <BrandHeader
@@ -111,9 +116,9 @@ function MobileLayout({ lender, ranked, idx, peers, currency, live, lastUpdated 
       />
 
       <Eyebrow lender={lender} idx={idx} total={ranked.length} />
-      <Hero lender={lender} />
+      <Hero lender={lender} loanUsd={loanUsd} currency={currency} live={live} />
 
-      <DashedRule label="QUOTE · $50K · 12MO · 50% LTV" />
+      <DashedRule label={quoteLabel} />
       <QuoteBlock lender={lender} currency={currency} live={live} />
 
       <DashedRule label="SPECS" />
@@ -131,7 +136,7 @@ function MobileLayout({ lender, ranked, idx, peers, currency, live, lastUpdated 
       <DashedRule label="APPLY" />
       <ApplyButton lender={lender} />
 
-      <Methodology />
+      <Methodology loanUsd={loanUsd} currency={currency} live={live} />
 
       <FineFooter source={live.source || 'mempool.space'} updated={lastUpdated} />
       <PageNav active="lender" />
@@ -143,7 +148,8 @@ function MobileLayout({ lender, ranked, idx, peers, currency, live, lastUpdated 
 // ============================================================
 // DESKTOP — open spread.
 // ============================================================
-function DesktopLayout({ lender, ranked, idx, peers, currency, live, lastUpdated }) {
+function DesktopLayout({ lender, ranked, idx, peers, currency, live, lastUpdated, loanUsd }) {
+  const quoteLabel = `QUOTE · ${fmtMoneyCompact(loanUsd, currency, CURRENCY_META, live.btcUsd)} · 12MO · 50% LTV`;
   return (
     <PaperFrame maxWidth={1320} sidePad={60} innerPad="0 56px">
       <BrandHeader
@@ -155,9 +161,9 @@ function DesktopLayout({ lender, ranked, idx, peers, currency, live, lastUpdated
         {/* LEFT */}
         <div style={{ padding: '0 32px 0 0', minWidth: 0 }}>
           <Eyebrow lender={lender} idx={idx} total={ranked.length} desktop />
-          <Hero lender={lender} desktop />
+          <Hero lender={lender} loanUsd={loanUsd} currency={currency} live={live} desktop />
 
-          <DashedRule label="QUOTE · $50K · 12MO · 50% LTV" />
+          <DashedRule label={quoteLabel} />
           <QuoteBlock lender={lender} currency={currency} live={live} desktop />
 
           <DashedRule label="CUSTODY · RISK" />
@@ -196,7 +202,7 @@ function DesktopLayout({ lender, ranked, idx, peers, currency, live, lastUpdated
           <DashedRule label="APPLY" />
           <ApplyButton lender={lender} />
 
-          <Methodology desktop />
+          <Methodology loanUsd={loanUsd} currency={currency} live={live} desktop />
         </div>
       </div>
 
@@ -227,7 +233,7 @@ function Eyebrow({ lender, idx, total, desktop = false }) {
   );
 }
 
-function Hero({ lender, desktop = false }) {
+function Hero({ lender, desktop = false, loanUsd, currency, live }) {
   const badge = lender.badge;
   return (
     <div style={{ marginBottom: desktop ? 6 : 2, position: 'relative' }}>
@@ -256,7 +262,7 @@ function Hero({ lender, desktop = false }) {
         color: SB.inkSoft, textWrap: 'pretty',
         maxWidth: desktop ? 460 : 'none',
       }}>
-        Bitcoin-backed loan review of <b style={{ color: SB.ink }}>{lender.name}</b>. Specs, custody model, ranking, and what differentiates them — measured against the directory at a standard $50K · 12-month · 50% LTV loan.
+        Bitcoin-backed loan review of <b style={{ color: SB.ink }}>{lender.name}</b>. Specs, custody model, ranking, and what differentiates them — measured against the directory at a standard {fmtMoney(loanUsd, currency, CURRENCY_META, live.btcUsd)} · 12-month · 50% LTV loan.
       </p>
     </div>
   );
@@ -479,14 +485,14 @@ function ApplyButton({ lender }) {
   );
 }
 
-function Methodology({ desktop = false }) {
+function Methodology({ desktop = false, loanUsd, currency, live }) {
   return (
     <p style={{
       margin: '14px 0 0',
       fontFamily: SB.sans, fontSize: desktop ? 12.5 : 11.5,
       lineHeight: 1.6, color: SB.inkSoft, textWrap: 'pretty',
     }}>
-      Quotes use a <b style={{ color: SB.ink }}>$50K, 12-month, 50% LTV</b> loan. Total cost = interest + origination + membership; adjusted cost adds a custody-risk premium for rehypothecation and pooled custody. Affiliate links never change the ranking. See <a href="/about" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>methodology</a> or browse the <a href="/lenders" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>full directory</a>.
+      Quotes use a <b style={{ color: SB.ink }}>{fmtMoney(loanUsd, currency, CURRENCY_META, live.btcUsd)}, 12-month, 50% LTV</b> loan. Total cost = interest + origination + membership; adjusted cost adds a custody-risk premium for rehypothecation and pooled custody. Affiliate links never change the ranking. See <a href="/about" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>methodology</a> or browse the <a href="/lenders" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>full directory</a>.
     </p>
   );
 }

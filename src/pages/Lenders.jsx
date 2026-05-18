@@ -24,8 +24,9 @@ import {
 } from '../system/components.jsx';
 import { useIsDesktop } from '../system/theme.jsx';
 import { DesktopSpreadFrame } from '../system/desktop.jsx';
-import { rankLenders } from '../lib/math.js';
+import { rankLenders, toUsd } from '../lib/math.js';
 import { fmtMoney, fmtNum } from '../lib/format.js';
+import { usePersistentState } from '../lib/hooks.js';
 import { useT } from '../i18n/index.jsx';
 
 // Lender-card terms grid cell.
@@ -167,8 +168,11 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
   const isDesktop = useIsDesktop();
   const t = useT();
   const [filter, setFilter] = useState('all');
-  // Standardize on a $50K loan for the default ranking display.
-  const QUOTE_LOAN_USD = 50000;
+
+  // Read the calculator's persisted loan amount so all pages
+  // (Landing, Calculator, Lenders, Compare) show the same quote size.
+  const [loanInCurrency] = usePersistentState('desiredLoan', 50000);
+  const loanUsd = toUsd(loanInCurrency, currency, CURRENCY_META, live.btcUsd);
 
   const filtered = useMemo(() => {
     return lenders.filter((l) => {
@@ -183,13 +187,13 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
 
   const ranked = useMemo(() =>
     rankLenders(filtered, {
-      loanUsd: QUOTE_LOAN_USD,
+      loanUsd,
       region: region || 'global',
       ltvPct: LTV_PCT,
       termMonths: TERM_MONTHS,
       eligibleOnly: false,
     }),
-    [filtered, region]
+    [filtered, region, loanUsd]
   );
 
   // Per-filter count for chip labels (compute over the full list).
@@ -213,7 +217,7 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
         currency={currency}
         live={live}
         lastUpdated={lastUpdated}
-        quoteLoanUsd={QUOTE_LOAN_USD}
+        quoteLoanUsd={loanUsd}
       />
     );
   }
@@ -268,7 +272,7 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
         color: SB.inkMute, marginTop: 8, letterSpacing: '0.02em',
         textAlign: 'center',
       }}>
-        {t('lenders.quoteSizedBefore')}<b style={{ color: SB.ink }}>{t('lenders.quoteSizedValue', { amount: fmtMoney(QUOTE_LOAN_USD, currency, CURRENCY_META, live.btcUsd), months: TERM_MONTHS, ltv: LTV_PCT })}</b>.
+        {t('lenders.quoteSizedBefore')}<b style={{ color: SB.ink }}>{t('lenders.quoteSizedValue', { amount: fmtMoney(loanUsd, currency, CURRENCY_META, live.btcUsd), months: TERM_MONTHS, ltv: LTV_PCT })}</b>.
       </div>
 
       <DashedRule label={t('lenders.section.ascending')} />

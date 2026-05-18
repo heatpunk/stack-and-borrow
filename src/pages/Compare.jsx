@@ -28,13 +28,10 @@ import {
   Button,
 } from '../system/components.jsx';
 import { useIsDesktop } from '../system/theme.jsx';
-import { rankLenders } from '../lib/math.js';
+import { rankLenders, toUsd } from '../lib/math.js';
 import { fmtMoney, fmtNum } from '../lib/format.js';
+import { usePersistentState } from '../lib/hooks.js';
 import { VoidState404 } from './Void.jsx';
-
-// Standardize comparison at $50K loan, 12mo, 50% LTV — same as /lenders
-// so users get apples-to-apples numbers across both pages.
-const QUOTE_LOAN_USD = 50000;
 
 function custodyLabel(l) {
   if (l.custodyType === 'multisig') {
@@ -64,6 +61,11 @@ function rehypoTone(l) {
 export default function ComparePage({ slug, lenders, lastUpdated, live, currency, region }) {
   const isDesktop = useIsDesktop();
 
+  // Read the calculator's persisted loan amount so all pages
+  // (Landing, Calculator, Lenders, Compare) show the same quote size.
+  const [loanInCurrency] = usePersistentState('desiredLoan', 50000);
+  const loanUsd = toUsd(loanInCurrency, currency, CURRENCY_META, live.btcUsd);
+
   // Parse the slug into two lender IDs. We accept either order; the
   // ranking math + visible "winner" is decided by adjustedTotalCost,
   // not by which side of the URL the user typed first.
@@ -77,13 +79,13 @@ export default function ComparePage({ slug, lenders, lastUpdated, live, currency
     const b = lenders.find((l) => l.id === bId);
     if (!a || !b) return null;
     return rankLenders([a, b], {
-      loanUsd: QUOTE_LOAN_USD,
+      loanUsd,
       region: region || 'global',
       ltvPct: LTV_PCT,
       termMonths: TERM_MONTHS,
       eligibleOnly: false,
     });
-  }, [lenders, aId, bId, region]);
+  }, [lenders, aId, bId, region, loanUsd]);
 
   // Loading state — lenders.json hasn't resolved yet.
   if (!lenders || lenders.length === 0) {
@@ -116,6 +118,7 @@ export default function ComparePage({ slug, lenders, lastUpdated, live, currency
       currency={currency}
       live={live}
       lastUpdated={lastUpdated}
+      loanUsd={loanUsd}
     />
   ) : (
     <MobileCompareLayout
@@ -126,6 +129,7 @@ export default function ComparePage({ slug, lenders, lastUpdated, live, currency
       currency={currency}
       live={live}
       lastUpdated={lastUpdated}
+      loanUsd={loanUsd}
     />
   );
 }
@@ -133,7 +137,7 @@ export default function ComparePage({ slug, lenders, lastUpdated, live, currency
 // ============================================================
 // Mobile layout — stacked, comparison-row table.
 // ============================================================
-function MobileCompareLayout({ winner, runner, costDelta, aprDelta, currency, live, lastUpdated }) {
+function MobileCompareLayout({ winner, runner, costDelta, aprDelta, currency, live, lastUpdated, loanUsd }) {
   return (
     <PaperFrame>
       <BrandHeader
@@ -164,7 +168,7 @@ function MobileCompareLayout({ winner, runner, costDelta, aprDelta, currency, li
           fontFamily: SB.sans, fontSize: 12.5, lineHeight: 1.55,
           color: SB.inkSoft, textWrap: 'pretty',
         }}>
-          On a <b style={{ color: SB.ink }}>${fmtNum(QUOTE_LOAN_USD)} · {TERM_MONTHS}mo · {LTV_PCT}% LTV</b> Bitcoin-backed loan, ranked by adjusted total cost — interest, origination, custody risk.
+          On a <b style={{ color: SB.ink }}>{fmtMoney(loanUsd, currency, CURRENCY_META, live.btcUsd)} · {TERM_MONTHS}mo · {LTV_PCT}% LTV</b> Bitcoin-backed loan, ranked by adjusted total cost — interest, origination, custody risk.
         </p>
       </div>
 
@@ -206,7 +210,7 @@ function MobileCompareLayout({ winner, runner, costDelta, aprDelta, currency, li
         fontFamily: SB.sans, fontSize: 12, lineHeight: 1.6,
         color: SB.inkSoft, textWrap: 'pretty',
       }}>
-        Quotes use a <b style={{ color: SB.ink }}>${fmtNum(QUOTE_LOAN_USD)}, {TERM_MONTHS}-month, {LTV_PCT}% LTV</b> Bitcoin-backed loan. Adjusted total cost = interest + origination + membership + a custody-risk premium that prices counterparty risk not reflected in nominal APR. Affiliate links never change the ranking. See <a href="/about" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>methodology</a> or browse the <a href="/lenders" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>full directory</a>.
+        Quotes use a <b style={{ color: SB.ink }}>{fmtMoney(loanUsd, currency, CURRENCY_META, live.btcUsd)}, {TERM_MONTHS}-month, {LTV_PCT}% LTV</b> Bitcoin-backed loan. Adjusted total cost = interest + origination + membership + a custody-risk premium that prices counterparty risk not reflected in nominal APR. Affiliate links never change the ranking. See <a href="/about" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>methodology</a> or browse the <a href="/lenders" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>full directory</a>.
       </p>
 
       <FineFooter source={live.source || 'mempool.space'} updated={lastUpdated} />
@@ -220,7 +224,7 @@ function MobileCompareLayout({ winner, runner, costDelta, aprDelta, currency, li
 // Desktop layout — open-book spread. Left = verdict + hero + methodology,
 // Right = comparison table + custody + apply CTAs.
 // ============================================================
-function DesktopCompareLayout({ winner, runner, costDelta, aprDelta, currency, live, lastUpdated }) {
+function DesktopCompareLayout({ winner, runner, costDelta, aprDelta, currency, live, lastUpdated, loanUsd }) {
   // We keep this self-contained rather than reusing DesktopSpreadFrame,
   // since the compare page is not part of the four-section booklet
   // nav and shouldn't render with currentPage/pageOf.
@@ -255,7 +259,7 @@ function DesktopCompareLayout({ winner, runner, costDelta, aprDelta, currency, l
             fontFamily: SB.sans, fontSize: 15, lineHeight: 1.55,
             color: SB.inkSoft, textWrap: 'pretty', maxWidth: 460,
           }}>
-            On a <b style={{ color: SB.ink }}>${fmtNum(QUOTE_LOAN_USD)} · {TERM_MONTHS}-month · {LTV_PCT}% LTV</b> Bitcoin-backed loan, ranked by adjusted total cost — interest, origination, custody risk.
+            On a <b style={{ color: SB.ink }}>{fmtMoney(loanUsd, currency, CURRENCY_META, live.btcUsd)} · {TERM_MONTHS}-month · {LTV_PCT}% LTV</b> Bitcoin-backed loan, ranked by adjusted total cost — interest, origination, custody risk.
           </p>
 
           <DashedRule label="VERDICT" />
@@ -274,7 +278,7 @@ function DesktopCompareLayout({ winner, runner, costDelta, aprDelta, currency, l
             fontFamily: SB.sans, fontSize: 13, lineHeight: 1.6,
             color: SB.inkSoft, textWrap: 'pretty', maxWidth: 480,
           }}>
-            Quotes use a <b style={{ color: SB.ink }}>${fmtNum(QUOTE_LOAN_USD)}, {TERM_MONTHS}-month, {LTV_PCT}% LTV</b> Bitcoin-backed loan. Adjusted total cost = interest + origination + membership + a custody-risk premium that prices counterparty risk not reflected in nominal APR. Affiliate links never change the ranking. See <a href="/about" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>methodology</a> or browse the <a href="/lenders" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>full directory</a>.
+            Quotes use a <b style={{ color: SB.ink }}>{fmtMoney(loanUsd, currency, CURRENCY_META, live.btcUsd)}, {TERM_MONTHS}-month, {LTV_PCT}% LTV</b> Bitcoin-backed loan. Adjusted total cost = interest + origination + membership + a custody-risk premium that prices counterparty risk not reflected in nominal APR. Affiliate links never change the ranking. See <a href="/about" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>methodology</a> or browse the <a href="/lenders" style={{ color: SB.orange, textDecoration: 'none', borderBottom: `1px dashed ${SB.orange}` }}>full directory</a>.
           </p>
         </div>
 
@@ -300,7 +304,7 @@ function DesktopCompareLayout({ winner, runner, costDelta, aprDelta, currency, l
             color: SB.inkMute, fontWeight: 700,
             marginTop: 18, marginBottom: 14,
           }}>
-            SIDE-BY-SIDE · ${fmtNum(QUOTE_LOAN_USD)} · {TERM_MONTHS} MO
+            SIDE-BY-SIDE · {fmtMoney(loanUsd, currency, CURRENCY_META, live.btcUsd)} · {TERM_MONTHS} MO
           </div>
 
           <CompareTable
