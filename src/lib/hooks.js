@@ -205,6 +205,10 @@ const ROUTE_ALIASES = {
   '/long-givare': 'lenders',
   '/om': 'about',
   '/om/': 'about',
+  // Swedish-tax page aliases (shorter forms redirect to the canonical slug).
+  '/skatt': 'sweden-tax',
+  '/skatt/': 'sweden-tax',
+  '/bitcoin-lan-skatt': 'sweden-tax',
 };
 
 const CANONICAL_PATH = {
@@ -212,7 +216,15 @@ const CANONICAL_PATH = {
   calculator: '/calculator',
   lenders: '/lenders',
   about: '/about',
+  'sweden-tax': '/skatt-bitcoin-lan',
 };
+
+// Compare-route slug pattern: two lender IDs joined by "-vs-".
+// Lender IDs in lenders.json are all lowercase a–z (no hyphens),
+// so this regex stays simple. If a future lender ID introduces a
+// hyphen, widen the character class and revisit canonicalization
+// in Compare.jsx.
+const COMPARE_SLUG_RE = /^[a-z0-9]+-vs-[a-z0-9]+$/;
 
 function normalizePath(pathname, hash) {
   // Strip trailing slash except for root.
@@ -228,6 +240,13 @@ function normalizePath(pathname, hash) {
   if (p === '/calculator') return 'calculator';
   if (p === '/lenders')    return 'lenders';
   if (p === '/about')      return 'about';
+  // Swedish-locale tax page (canonical Swedish slug).
+  if (p === '/skatt-bitcoin-lan') return 'sweden-tax';
+  // Compare pages — /compare/{a}-vs-{b}.
+  if (p.startsWith('/compare/')) {
+    const slug = p.slice('/compare/'.length);
+    if (COMPARE_SLUG_RE.test(slug)) return 'compare:' + slug;
+  }
   // Alias paths (Swedish, legacy).
   const aliased = ROUTE_ALIASES[p] ?? ROUTE_ALIASES[p + '/'];
   if (aliased !== undefined) return aliased;

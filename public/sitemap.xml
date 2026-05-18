@@ -33,4 +33,15 @@
     <xhtml:link rel="alternate" hreflang="sv" href="https://stackandborrow.com/about"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://stackandborrow.com/about"/>
   </url>
+  <url>
+    <loc>https://stackandborrow.com/skatt-bitcoin-lan</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://stackandborrow.com/skatt-bitcoin-lan"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://stackandborrow.com/skatt-bitcoin-lan"/>
+  </url>
+  <!-- Compare pages (/compare/{a}-vs-{b}) are appended at build time
+       by the generate-compare-pages Vite plugin so the sitemap stays
+       in sync with whatever lenders.json contains at deploy. Do not
+       hand-edit compare entries — re-run `npm run build`. -->
 </urlset>

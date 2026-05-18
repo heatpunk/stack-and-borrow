@@ -21,6 +21,8 @@ import CalculatorPage from './pages/Calculator.jsx';
 import LendersPage   from './pages/Lenders.jsx';
 import AboutPage     from './pages/About.jsx';
 import LandingPage   from './pages/Landing.jsx';
+import ComparePage   from './pages/Compare.jsx';
+import SwedenTaxPage from './pages/SwedenTax.jsx';
 import { VoidState404 } from './pages/Void.jsx';
 import { SB, ensureThemeCss } from './system/tokens.js';
 import { ThemeProvider } from './system/theme.jsx';
@@ -107,8 +109,9 @@ export default function App() {
   // sync with the active route. Static HTML files set the initial
   // values at first paint (so crawlers without JS see correct
   // meta), and this keeps them right when users navigate
-  // client-side.
-  React.useEffect(() => { applyRouteSeo(route); }, [route]);
+  // client-side. Compare routes pull lender names from lenders.json
+  // at render time, so we pass it in for the per-pair lookup.
+  React.useEffect(() => { applyRouteSeo(route, { lenders }); }, [route, lenders]);
 
   // Currency defaults from locale (first visit). The Calculator owns the
   // persistent storage; we only seed the initial value.
@@ -132,6 +135,8 @@ export default function App() {
   //   'calculator' → Calculator (/calculator)
   //   'lenders'    → Lenders (/lenders)
   //   'about'      → Terms / About (/about)
+  //   'sweden-tax' → Swedish tax guide (/skatt-bitcoin-lan)
+  //   'compare:X-vs-Y' → Head-to-head (/compare/X-vs-Y)
   //   anything else → 404
   let page;
   if (route === '') {
@@ -165,6 +170,20 @@ export default function App() {
     );
   } else if (route === 'about') {
     page = <AboutPage />;
+  } else if (route === 'sweden-tax') {
+    page = <SwedenTaxPage live={live} lastUpdated={lastUpdated} />;
+  } else if (typeof route === 'string' && route.startsWith('compare:')) {
+    const slug = route.slice('compare:'.length);
+    page = (
+      <ComparePage
+        slug={slug}
+        lenders={lenders}
+        lastUpdated={lastUpdated}
+        live={live}
+        currency={readStoredCurrency(initialCurrency)}
+        region={region}
+      />
+    );
   } else {
     page = <VoidState404 attemptedPath={route} />;
   }

@@ -107,7 +107,78 @@ export const SEO_DATA = {
       description: 'Methodology, ranking math, and disclosures for Stack & Borrow.',
     },
   },
+
+  'sweden-tax': {
+    path: '/skatt-bitcoin-lan',
+    lang: 'sv',
+    title: 'Skatt på lån mot bitcoin i Sverige — Stack & Borrow',
+    description: 'Hur Skatteverket ser på bitcoin-säkrade lån i Sverige: ingen kapitalvinstskatt när du lånar, beskattning vid likvidation, ränteavdrag, och vad som skiljer ett kryptolån från andra lån. Klar och uppdaterad guide.',
+    keywords: 'bitcoin lån skatt, låna mot bitcoin skatt sverige, kryptolån skatt, deklarera bitcoin lån, bitcoin som säkerhet skatt, skatteverket bitcoin lån, kapitalvinstskatt bitcoin lån, ränteavdrag kryptolån',
+    ogTitle: 'Skatt på lån mot bitcoin i Sverige',
+    ogDescription: 'Ingen skattepliktig händelse när du lånar mot bitcoin — men det finns hakar. Klar svensk guide till Skatteverkets praxis.',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: 'Skatt på lån mot bitcoin i Sverige',
+      inLanguage: 'sv-SE',
+      url: ORIGIN + '/skatt-bitcoin-lan',
+      description: 'Svensk guide till skatteregler för bitcoin-säkrade lån: när uppstår skattepliktig händelse, ränteavdrag, likvidation och deklaration.',
+      author: { '@type': 'Organization', name: 'Stack & Borrow' },
+      publisher: { '@type': 'Organization', name: 'Stack & Borrow' },
+    },
+  },
 };
+
+// Build the SEO data for a compare page (/compare/{a}-vs-{b}). Lender
+// data comes from lenders.json at runtime; the lenders array is passed
+// in so we can resolve display names and produce a rich title and
+// description. The canonical URL is the alphabetical-order slug, so
+// inverted-order requests (/compare/strike-vs-firefish) still collapse
+// to one canonical URL in search results.
+export function buildCompareSeo(slug, lenders) {
+  const parts = (slug || '').split('-vs-');
+  if (parts.length !== 2) return null;
+  const [aId, bId] = parts;
+  const a = (lenders || []).find((l) => l.id === aId);
+  const b = (lenders || []).find((l) => l.id === bId);
+  if (!a || !b) return null;
+
+  // Canonical slug is alphabetical, so e.g. "ledn-vs-strike" canonicalizes
+  // to "ledn-vs-strike" and "strike-vs-ledn" also canonicalizes to "ledn-vs-strike".
+  const [c1, c2] = [aId, bId].sort();
+  const canonicalSlug = `${c1}-vs-${c2}`;
+  const canonicalPath = `/compare/${canonicalSlug}`;
+  const aName = a.name;
+  const bName = b.name;
+
+  // Title and description shape both Google snippet and OpenGraph card.
+  // Keep them tight enough to render fully in SERPs (≤ 60 chars title,
+  // ≤ 160 chars description).
+  const title = `${aName} vs ${bName} — Bitcoin Loan Comparison | Stack & Borrow`;
+  const description = `${aName} vs ${bName}: APR, origination fees, custody, rehypothecation, and total cost on a Bitcoin-backed loan. Independent comparison, sats-first ranking.`;
+
+  return {
+    path: canonicalPath,
+    title,
+    description,
+    keywords: `${aName.toLowerCase()} vs ${bName.toLowerCase()}, ${aName.toLowerCase()} review, ${bName.toLowerCase()} review, bitcoin loan comparison, btc backed loan comparison, ${aName.toLowerCase()} vs ${bName.toLowerCase()} rates, bitcoin loan rates compared`,
+    ogTitle: `${aName} vs ${bName} — which Bitcoin lender wins?`,
+    ogDescription: description,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: `${aName} vs ${bName} — Bitcoin Loan Comparison`,
+      url: ORIGIN + canonicalPath,
+      description,
+      author: { '@type': 'Organization', name: 'Stack & Borrow' },
+      publisher: { '@type': 'Organization', name: 'Stack & Borrow' },
+      about: [
+        { '@type': 'Organization', name: aName },
+        { '@type': 'Organization', name: bName },
+      ],
+    },
+  };
+}
 
 // Read-only export of just the URL list — used by build-time
 // scripts and the sitemap generator.
@@ -115,9 +186,24 @@ export const ROUTE_URLS = Object.values(SEO_DATA).map((d) => ORIGIN + d.path);
 
 // Apply the SEO metadata for a given route to the live document.
 // Safe to call repeatedly; idempotent for the same route.
-export function applyRouteSeo(route) {
+//
+// `route` is the normalized route name from useRoute(). For dynamic
+// compare routes ("compare:{slug}") the lenders array is consulted to
+// build a per-pair title and description. If the lenders haven't loaded
+// yet (first paint before the lenders.json fetch resolves), the static
+// HTML shell's meta tags are already correct — we no-op rather than
+// overwriting them with landing-page defaults.
+export function applyRouteSeo(route, ctx = {}) {
   if (typeof document === 'undefined') return;
-  const data = SEO_DATA[route] || SEO_DATA[''];
+  let data;
+  if (typeof route === 'string' && route.startsWith('compare:')) {
+    const slug = route.slice('compare:'.length);
+    data = buildCompareSeo(slug, ctx.lenders);
+    // No lender data yet → leave the static HTML shell's tags alone.
+    if (!data) return;
+  } else {
+    data = SEO_DATA[route] || SEO_DATA[''];
+  }
   const canonicalUrl = ORIGIN + data.path;
 
   document.title = data.title;

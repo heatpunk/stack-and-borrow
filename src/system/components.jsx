@@ -767,6 +767,11 @@ function LanguageSwitchLink() {
 
 // ------------------------------------------------------------
 // FineFooter — the ※ disclaimer lines.
+//
+// Always renders the Swedish-tax page link in plain text — kept
+// visible on every page (not gated on lang) so crawlers see one
+// stable inbound link from every English page in addition to the
+// sitemap entry.
 // ------------------------------------------------------------
 export function FineFooter({ source = 'mempool.space', updated = null }) {
   const t = useT();
@@ -783,6 +788,8 @@ export function FineFooter({ source = 'mempool.space', updated = null }) {
       {t('common.footer.disclaimer')}<br />
       {t('common.footer.contact')}<a href="mailto:feedback@stackandborrow.com" style={{ color: SB.inkSoft, textDecoration: 'underline' }}>feedback@stackandborrow.com</a>
       {updated && <><br />{t('common.footer.dataVerified', { updated })}</>}
+      <br />
+      ※ Sverige · <a href="/skatt-bitcoin-lan" style={{ color: SB.inkSoft, textDecoration: 'underline' }}>Skatt på lån mot bitcoin</a>
       <LanguageSwitchLink />
     </div>
   );

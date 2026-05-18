@@ -81,6 +81,88 @@ function custodyShort(l, t) {
 
 const FILTER_IDS = ['all', 'us', 'eu', 'btcOnly', 'noRehypo', 'multisig'];
 
+// Curated head-to-head pairs that get prime placement on /lenders.
+// All 91 pairs are reachable via /compare/{a}-vs-{b} and listed in the
+// sitemap; this block is for the eight matchups that drive the most
+// search-volume signal (kept alphabetical to match canonical URL order).
+const FEATURED_PAIRS = [
+  ['arch',     'strike',    'US heavyweights'],
+  ['debifi',   'firefish',  'EU non-custodial'],
+  ['firefish', 'ledn',      'EU vs global incumbent'],
+  ['ledn',     'nexo',      'BTC-only vs multi-coin CeFi'],
+  ['ledn',     'strike',    'most-asked US matchup'],
+  ['ledn',     'surge',     'incumbent vs DLC newcomer'],
+  ['ledn',     'unchained', 'custodial vs multisig'],
+  ['strike',   'unchained', 'rate vs custody'],
+];
+
+// Render a single tile linking to /compare/{a}-vs-{b}.
+function ComparisonTile({ a, b, hint, lenders, desktop = false }) {
+  const aLender = lenders.find((l) => l.id === a);
+  const bLender = lenders.find((l) => l.id === b);
+  if (!aLender || !bLender) return null;
+  const href = `/compare/${a}-vs-${b}`;
+  return (
+    <a
+      href={href}
+      style={{
+        display: 'block',
+        padding: desktop ? '12px 14px' : '10px 12px',
+        border: `1px dashed ${SB.inkLine}`,
+        textDecoration: 'none',
+        color: 'inherit',
+        transition: 'border-color 120ms ease',
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = SB.ink; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = SB.inkLine; }}
+    >
+      <div style={{
+        display: 'flex', alignItems: 'baseline', gap: 6,
+        fontFamily: SB.serif,
+        fontSize: desktop ? 17 : 15,
+        fontWeight: 600,
+        color: SB.ink,
+        letterSpacing: '-0.005em',
+        lineHeight: 1.2,
+      }}>
+        <span>{aLender.name}</span>
+        <span style={{ color: SB.orange, fontStyle: 'italic', fontWeight: 500, fontSize: desktop ? 14 : 12 }}>vs</span>
+        <span>{bLender.name}</span>
+      </div>
+      <div style={{
+        marginTop: 4,
+        fontFamily: SB.mono,
+        fontSize: 9.5, letterSpacing: '0.08em',
+        color: SB.inkMute,
+        textTransform: 'uppercase',
+      }}>
+        {hint} <span style={{ color: SB.orange }}>↗</span>
+      </div>
+    </a>
+  );
+}
+
+function FeaturedComparisons({ lenders, desktop = false }) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: desktop ? '1fr 1fr' : '1fr',
+      gap: 8,
+    }}>
+      {FEATURED_PAIRS.map(([a, b, hint]) => (
+        <ComparisonTile
+          key={`${a}-${b}`}
+          a={a}
+          b={b}
+          hint={hint}
+          lenders={lenders}
+          desktop={desktop}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function LendersPage({ lenders, lastUpdated, live, currency, region }) {
   const isDesktop = useIsDesktop();
   const t = useT();
@@ -328,6 +410,10 @@ export default function LendersPage({ lenders, lastUpdated, live, currency, regi
         })}
       </div>
 
+      <DashedRule label="HEAD-TO-HEAD" />
+
+      <FeaturedComparisons lenders={lenders} />
+
       <DashedRule label={t('common.glossary.label')} />
 
       <div>
@@ -444,6 +530,10 @@ function DesktopLendersLayout({
           valueStyle={{ fontFamily: SB.sans, fontWeight: 500, fontSize: 12 }}
           sub={t('lenders.glossary.orig.sub')} />
       </div>
+
+      <DashedRule label="HEAD-TO-HEAD" />
+
+      <FeaturedComparisons lenders={lenders} desktop />
 
       <DashedRule label={t('lenders.section.method')} />
 
