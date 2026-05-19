@@ -13,7 +13,7 @@
 // rules before acting.
 // ============================================================
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SB } from '../system/tokens.js';
 import {
   PaperFrame,
@@ -181,8 +181,9 @@ function Hero({ desktop = false }) {
         letterSpacing: '-0.025em',
         color: SB.ink,
       }}>
-        Skatt på lån{' '}
-        <span style={{ color: SB.orange, fontStyle: 'italic', fontWeight: 500 }}>mot bitcoin</span>
+        Skatt på lån
+        <br />
+        <span style={{ color: SB.orange, fontStyle: 'italic', fontWeight: 500, whiteSpace: 'nowrap' }}>mot bitcoin</span>
         <br />
         i Sverige.
       </h1>
@@ -459,26 +460,74 @@ function SectionMisconceptions({ desktop = false }) {
 }
 
 function Misconception({ myth, truth, desktop }) {
+  const [open, setOpen] = useState(false);
   return (
     <div style={{
       marginBottom: 14,
-      padding: '10px 12px',
       borderLeft: `2.5px solid ${SB.orange}`,
       background: 'rgba(186, 95, 21, 0.04)',
     }}>
-      <div style={{
-        fontFamily: SB.serif, fontStyle: 'italic',
-        fontSize: desktop ? 14 : 13, color: SB.ink, fontWeight: 500,
-        marginBottom: 6, textWrap: 'pretty', lineHeight: 1.4,
-      }}>
-        {myth}
-      </div>
-      <div style={{
-        fontFamily: SB.sans, fontSize: desktop ? 12.5 : 12,
-        lineHeight: 1.6, color: SB.inkSoft, textWrap: 'pretty',
-      }}>
-        {truth}
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        style={{
+          display: 'block',
+          width: '100%',
+          textAlign: 'left',
+          background: 'transparent',
+          border: 'none',
+          padding: '10px 12px',
+          margin: 0,
+          cursor: 'pointer',
+          color: 'inherit',
+          font: 'inherit',
+        }}
+      >
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 16px',
+          gap: 10,
+          alignItems: 'start',
+        }}>
+          <div style={{
+            fontFamily: SB.serif, fontStyle: 'italic',
+            fontSize: desktop ? 14 : 13, color: SB.ink, fontWeight: 500,
+            textWrap: 'pretty', lineHeight: 1.4,
+          }}>
+            {myth}
+          </div>
+          <span
+            aria-hidden="true"
+            style={{
+              fontFamily: SB.mono,
+              fontSize: 16,
+              color: SB.orange,
+              fontWeight: 700,
+              lineHeight: 1.2,
+              userSelect: 'none',
+              transform: open ? 'rotate(45deg)' : 'rotate(0)',
+              transition: 'transform 180ms ease',
+              transformOrigin: 'center',
+              display: 'inline-block',
+              textAlign: 'center',
+            }}
+          >
+            +
+          </span>
+        </div>
+      </button>
+      {open && (
+        <div style={{
+          padding: '8px 12px 12px',
+          marginTop: -2,
+          borderTop: `1px dashed ${SB.inkLine}`,
+          fontFamily: SB.sans, fontSize: desktop ? 12.5 : 12,
+          lineHeight: 1.6, color: SB.inkSoft, textWrap: 'pretty',
+        }}>
+          {truth}
+        </div>
+      )}
     </div>
   );
 }
