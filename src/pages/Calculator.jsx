@@ -622,6 +622,7 @@ export default function CalculatorPage({
         profiles={profiles}
         currency={currency}
         fmt={fmt}
+        live={live}
       />
 
       <FineFooter source={live.source} updated={lastUpdated} />
@@ -977,7 +978,7 @@ function MaturityOption({ rn, label, primary, primarySub, right, rightSub, tone,
 function LongViewSection({
   lender, loanUsd, collateralBtc, btcSpotUsd,
   activeCagr, profileId, caseId, profiles,
-  currency, fmt, desktop,
+  currency, fmt, live, desktop,
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -1725,6 +1726,7 @@ function DesktopCalculatorLayout(props) {
         profiles={profiles}
         currency={currency}
         fmt={fmt}
+        live={live}
         desktop
       />
     </div>
